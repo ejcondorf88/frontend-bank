@@ -1,0 +1,96 @@
+# ============================================
+# DOCKERIGNORE - Frontend Bank
+# Archivos que NO se copian al contexto de Docker
+# ============================================
+
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Build output
+dist
+build
+tmp
+temp
+
+# Git
+.git
+.gitignore
+.gitattributes
+.gitmodules
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage
+.nyc_output
+
+# Logs
+logs
+*.log
+
+# Environment files (excepto los necesarios)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Documentation
+*.md
+!README.md
+STUDY-GUIDE.md
+FLASHCARDS.md
+PODCAST-SCRIPTS.md
+NOTEBOOK-LLM-GUIDE.md
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+.azure-pipelines.yml
+Jenkinsfile
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.docker
+
+# Kubernetes
+k8s
+helm
+*.yaml
+!angular.json
+!tsconfig*.json
+
+# Misc
+.editorconfig
+.eslintrc
+.eslintignore
+.prettierrc
+.prettierignore
+.browserslistrc
+karma.conf.js
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
