@@ -199,6 +199,50 @@ readonly isDeleting = signal<boolean>(false);
 
 ---
 
+## 🔗 Consistencia con Backend Node.js
+
+El frontend consume una API Express con `routing-controllers` que corre en `http://localhost:3002`. Se verificó la consistencia entre lo que el backend expone y lo que el frontend consume.
+
+### Endpoints y Tipado
+
+| Método | Endpoint | Backend retorna | Frontend tipa como | ¿Consistente? |
+|---|---|---|---|---|
+| GET | `/bp/products` | `{ data: Product[] }` | `ProductResponse` → `Product[]` | ✅ |
+| GET | `/bp/products/verification/:id` | `true` / `false` (booleano) | `Observable<boolean>` | ✅ |
+| POST | `/bp/products` | `{ message, data: Product }` | `Observable<Product>` con `map(res ⇒ res.data)` | ✅ |
+| PUT | `/bp/products/:id` | `{ message, data: Product }` | `Observable<Product>` con `map(res ⇒ res.data)` | ✅ |
+| DELETE | `/bp/products/:id` | `{ message }` | `Observable<void>` | ✅ |
+
+### Inconsistencias Detectadas y Corregidas
+
+| # | Problema | Backend | Frontend (antes) | Corrección |
+|---|---|---|---|---|
+| 1 | POST/PUT retornan `{ message, data }` pero el servicio tipaba como `Product` directo | `return { message, data }` | `http.post<Product>(...)` | Se creó `ApiResponse<T>` y se mapea con `map(res ⇒ res.data)` |
+| 2 | `name` validación de longitud mínima distinta | `@MinLength(6)` en DTO | `Validators.minLength(5)` | Se alineó a `minLength(6)` en formulario y template |
+
+### Interfaz `ApiResponse<T>`
+
+```typescript
+// src/app/features/products/models/product.model.ts
+export interface ApiResponse<T> {
+  message: string;
+  data: T;
+}
+```
+
+Esta interfaz genérica permite tipar correctamente cualquier respuesta del backend que siga el patrón `{ message, data }`. Se usa en `createProduct()` y `updateProduct()`:
+
+```typescript
+createProduct(product: ProductRequest): Observable<Product> {
+  return this.http.post<ApiResponse<Product>>(`${this.apiUrl}/bp/products`, product).pipe(
+    map(response => response.data),  // Extrae el producto real
+    catchError(this.handleError)
+  );
+}
+```
+
+---
+
 ## ⚡ Mejora de Rendimiento: OnPush + Signals
 
 ### Problema original
@@ -257,7 +301,7 @@ Se agregó `OnPush` a los 5 componentes principales y se migró `@Input()`/`@Out
 | Campo | Reglas | Tipo |
 |---|---|---|
 | ID | Requerido, 3-10 caracteres, único | Síncrona + Asíncrona (API) |
-| Nombre | Requerido, 5-100 caracteres | Síncrona |
+| Nombre | Requerido, 6-100 caracteres | Síncrona |
 | Descripción | Requerido, 10-200 caracteres | Síncrona |
 | Logo | Requerido, URL válida (regex `^https?://.+`) | Síncrona |
 | Fecha Liberación | Requerido, ≥ fecha actual | Síncrona |

@@ -55,7 +55,16 @@ export interface ProductRequest {
 }
 
 /**
- * Respuesta de la API
+ * Respuesta genérica de la API
+ * El backend (routing-controllers) envuelve las respuestas en { message, data }
+ */
+export interface ApiResponse<T> {
+  message: string;
+  data: T;
+}
+
+/**
+ * Respuesta de listado de productos
  */
 export interface ProductResponse {
   data: Product[];
