@@ -1,0 +1,164 @@
+<div class="products-page">
+  <!-- Header con logo -->
+  <header class="page-header">
+    <div class="logo-container">
+      <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="3" y1="9" x2="21" y2="9"></line>
+        <line x1="9" y1="21" x2="9" y2="9"></line>
+      </svg>
+      <span class="logo-text">BANCO</span>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="main-content">
+    <!-- Barra de búsqueda -->
+    <div class="search-section">
+      <div class="search-box">
+        <input
+          type="search"
+          [value]="searchQuery()"
+          (input)="onSearchChange($any($event.target).value)"
+          placeholder="Search..."
+          class="search-input"
+        />
+      </div>
+    </div>
+
+    <!-- Tabla de productos -->
+    <div class="table-container">
+      @if (isLoading()) {
+        <!-- Estado de carga -->
+        <div class="skeleton-container">
+          @for (i of skeletonArray(); track i) {
+            <div class="skeleton-row">
+              <div class="skeleton-logo"></div>
+              <div class="skeleton-text"></div>
+              <div class="skeleton-text long"></div>
+              <div class="skeleton-text"></div>
+              <div class="skeleton-text"></div>
+            </div>
+          }
+        </div>
+      } @else if (error()) {
+        <!-- Estado de error -->
+        <div class="error-state">
+          <p>{{ error() }}</p>
+          <button (click)="loadProducts()" class="btn-retry">Reintentar</button>
+        </div>
+      } @else if (paginatedProducts().length === 0) {
+        <!-- Sin resultados -->
+        <div class="empty-state">
+          <p>No se encontraron productos</p>
+        </div>
+      } @else {
+        <!-- Tabla de productos -->
+        <table class="products-table">
+          <thead>
+            <tr>
+              <th class="col-logo">Logo</th>
+              <th 
+                class="col-name sortable" 
+                (click)="onSort('name')"
+                [class.sorted]="isSortedBy('name')"
+              >
+                Nombre del producto
+                <span class="sort-icon">{{ getSortIcon('name') }}</span>
+              </th>
+              <th class="col-description">
+                Descripción
+                <span class="info-icon">ⓘ</span>
+              </th>
+              <th 
+                class="col-date sortable" 
+                (click)="onSort('date_release')"
+                [class.sorted]="isSortedBy('date_release')"
+              >
+                Fecha de liberación
+                <span class="sort-icon">{{ getSortIcon('date_release') }}</span>
+              </th>
+              <th 
+                class="col-date sortable" 
+                (click)="onSort('date_revision')"
+                [class.sorted]="isSortedBy('date_revision')"
+              >
+                Fecha de reestructuración
+                <span class="sort-icon">{{ getSortIcon('date_revision') }}</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of paginatedProducts(); track product.id) {
+              <tr class="product-row">
+                <td class="col-logo">
+                  <div class="logo-cell">
+                    <img 
+                      [src]="product.logo" 
+                      [alt]="'Logo de ' + product.name"
+                      class="product-logo"
+                      (error)="onImageError($event)"
+                    />
+                  </div>
+                </td>
+                <td class="col-name">{{ product.name }}</td>
+                <td class="col-description">{{ product.description }}</td>
+                <td class="col-date">{{ formatDate(product.date_release) }}</td>
+                <td class="col-date">{{ formatDate(product.date_revision) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <!-- Footer con resultados y paginación -->
+    <footer class="table-footer">
+      <div class="results-info">
+        <span>{{ totalResults() }} Resultados</span>
+      </div>
+
+      @if (!isLoading() && !error() && totalPages() > 1) {
+        <div class="pagination">
+          <button 
+            class="btn-page" 
+            [disabled]="currentPage() === 1"
+            (click)="onPageChange(currentPage() - 1)"
+          >
+            ‹
+          </button>
+          
+          @for (page of [].constructor(totalPages()); let i = $index; track i) {
+            <button 
+              class="btn-page" 
+              [class.active]="currentPage() === i + 1"
+              (click)="onPageChange(i + 1)"
+            >
+              {{ i + 1 }}
+            </button>
+          }
+          
+          <button 
+            class="btn-page" 
+            [disabled]="currentPage() === totalPages()"
+            (click)="onPageChange(currentPage() + 1)"
+          >
+            ›
+          </button>
+        </div>
+      }
+
+      <!-- Selector de cantidad -->
+      <div class="page-size-selector">
+        <select 
+          [value]="pageSize()" 
+          (change)="onPageSizeChange($any($event.target).value)"
+        >
+          @for (size of pageSizeOptions; track size) {
+            <option [value]="size">{{ size }}</option>
+          }
+        </select>
+      </div>
+    </footer>
+  </main>
+</div>

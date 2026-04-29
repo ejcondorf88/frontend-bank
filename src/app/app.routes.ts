@@ -21,8 +21,12 @@ export const routes: Routes = [
         loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES)
       },
       {
+        path: 'products',
+        loadChildren: () => import('./features/products/products.routes').then(m => m.PRODUCTS_ROUTES)
+      },
+      {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: 'products',
         pathMatch: 'full'
       }
     ]
