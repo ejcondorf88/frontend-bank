@@ -22,6 +22,32 @@ $input-focus: #3b82f6;
   align-items: center;
 }
 
+// Header del Banco (mismo estilo que products-list)
+.page-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #1e3a5f;
+
+  .logo-icon {
+    width: 28px;
+    height: 28px;
+    stroke-width: 2.5px;
+  }
+
+  .logo-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+}
+
 // Header
 .form-header {
   text-align: center;

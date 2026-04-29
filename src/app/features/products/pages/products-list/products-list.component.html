@@ -1,5 +1,5 @@
-<div class="products-page">
-  <!-- Header con logo -->
+<div class="products-page" (click)="closeAllMenus()">
+  <!-- Header con logo del Banco -->
   <header class="page-header">
     <div class="logo-container">
       <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -111,7 +111,25 @@
                 <td class="col-date">{{ formatDate(product.date_release) }}</td>
                 <td class="col-date">{{ formatDate(product.date_revision) }}</td>
                 <td class="col-actions">
-                  <button class="btn-menu" title="Más opciones">⋮</button>
+                  <div class="actions-cell">
+                    <button
+                      class="btn-menu"
+                      (click)="toggleMenu($event, product.id)"
+                      title="Más opciones"
+                      [attr.aria-expanded]="openMenuId() === product.id"
+                    >⋮</button>
+
+                    @if (openMenuId() === product.id) {
+                      <div class="dropdown-menu" (click)="$event.stopPropagation()">
+                        <button class="dropdown-item" (click)="onEditProduct(product)">
+                          Editar
+                        </button>
+                        <button class="dropdown-item delete" (click)="onDeleteProduct(product)">
+                          Eliminar
+                        </button>
+                      </div>
+                    }
+                  </div>
                 </td>
               </tr>
             }
@@ -158,9 +176,9 @@
 
       <!-- Selector de cantidad -->
       <div class="page-size-selector">
-        <select 
-          [value]="pageSize()" 
-          (change)="onPageSizeChange($any($event.target).value)"
+        <select
+          [ngModel]="pageSize()"
+          (ngModelChange)="onPageSizeChange($event)"
         >
           @for (size of pageSizeOptions; track size) {
             <option [value]="size">{{ size }}</option>
@@ -170,3 +188,31 @@
     </footer>
   </main>
 </div>
+
+<!-- Modal de Confirmación de Eliminación (D4) -->
+@if (deleteTargetId()) {
+  <div class="modal-overlay" (click)="cancelDelete()" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h2 id="modal-title" class="modal-title">¿Estás seguro de eliminar?</h2>
+      <p class="modal-body">
+        ¿Deseas eliminar el producto <strong>{{ deleteTargetName() }}</strong>? Esta acción no se puede deshacer.
+      </p>
+      <div class="modal-actions">
+        <button
+          class="btn-cancel"
+          (click)="cancelDelete()"
+          [disabled]="isDeleting()"
+        >
+          Cancelar
+        </button>
+        <button
+          class="btn-delete"
+          (click)="confirmDelete()"
+          [disabled]="isDeleting()"
+        >
+          {{ isDeleting() ? 'Eliminando...' : 'Eliminar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
