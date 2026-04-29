@@ -53,6 +53,7 @@ export class ProductsListComponent implements OnInit {
   readonly searchQuery = computed(() => this._searchQuery());
   readonly pageSize = computed(() => this._pageSize());
   readonly currentPage = computed(() => this._currentPage());
+  readonly sortField = computed(() => this._sortField());
   readonly sortOrder = computed(() => this._sortOrder());
 
   // Productos filtrados
@@ -178,14 +179,27 @@ export class ProductsListComponent implements OnInit {
     return this._sortOrder() === 'asc' ? '▲' : '▼';
   }
 
+  /** Calcula el rango mostrado */
+  displayedRange(): { start: number; end: number } {
+    const start = (this._currentPage() - 1) * this._pageSize() + 1;
+    const end = Math.min(start + this._pageSize() - 1, this.totalResults());
+    return { start, end };
+  }
+
+  /** Genera array de números de página */
+  getPageNumbers(): number[] {
+    const total = this.totalPages();
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
   /** Formatea fecha para mostrar */
   formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    // Parsear fecha como UTC para evitar problemas de zona horaria
+    const date = new Date(dateString + 'T00:00:00Z');
+    const day = date.getUTCDate().toString().padStart(2, '0');
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+    const year = date.getUTCFullYear();
+    return `${day}/${month}/${year}`;
   }
 
   /** Maneja error de imagen */

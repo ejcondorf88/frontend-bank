@@ -111,7 +111,8 @@ export class ProductService {
       map(products => {
         if (!query.trim()) return products;
         const lowerQuery = query.toLowerCase();
-        return products.filter(product => 
+        return products.filter(product =>
+          product.id.toLowerCase().includes(lowerQuery) ||
           product.name.toLowerCase().includes(lowerQuery) ||
           product.description.toLowerCase().includes(lowerQuery)
         );
@@ -126,8 +127,8 @@ export class ProductService {
    * @returns Fecha de revisión (YYYY-MM-DD)
    */
   calculateRevisionDate(releaseDate: string): string {
-    const date = new Date(releaseDate);
-    date.setFullYear(date.getFullYear() + 1);
+    const date = new Date(releaseDate + 'T00:00:00Z');
+    date.setUTCFullYear(date.getUTCFullYear() + 1);
     return date.toISOString().split('T')[0];
   }
 
@@ -138,20 +139,21 @@ export class ProductService {
    * @returns Objeto con validación y mensaje de error si aplica
    */
   validateDates(releaseDate: string, revisionDate: string): { valid: boolean; error?: string } {
-    const release = new Date(releaseDate);
-    const revision = new Date(revisionDate);
+    // Normalizar fechas a medianoche UTC para comparaciones consistentes
+    const release = new Date(releaseDate + 'T00:00:00Z');
+    const revision = new Date(revisionDate + 'T00:00:00Z');
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
 
     // Fecha de liberación debe ser >= hoy
-    if (release < today) {
+    if (release.getTime() < today.getTime()) {
       return { valid: false, error: 'La fecha de liberación debe ser hoy o posterior' };
     }
 
     // Fecha de revisión debe ser exactamente 1 año después
     const expectedRevision = new Date(release);
-    expectedRevision.setFullYear(expectedRevision.getFullYear() + 1);
-    
+    expectedRevision.setUTCFullYear(expectedRevision.getUTCFullYear() + 1);
+
     if (revision.getTime() !== expectedRevision.getTime()) {
       return { valid: false, error: 'La fecha de revisión debe ser exactamente 1 año después de la liberación' };
     }

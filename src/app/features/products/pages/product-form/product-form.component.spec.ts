@@ -11,9 +11,9 @@ import { Product } from '../../models/product.model';
 describe('ProductFormComponent', () => {
   let component: ProductFormComponent;
   let fixture: ComponentFixture<ProductFormComponent>;
-  let productService: jasmine.SpyObj<ProductService>;
-  let notificationService: jasmine.SpyObj<NotificationService>;
-  let router: jasmine.SpyObj<Router>;
+  let productService: jest.Mocked<ProductService>;
+  let notificationService: jest.Mocked<NotificationService>;
+  let router: jest.Mocked<Router>;
   let activatedRoute: any;
 
   const mockProduct: Product = {
@@ -26,25 +26,27 @@ describe('ProductFormComponent', () => {
   };
 
   beforeEach(async () => {
-    const productServiceSpy = jasmine.createSpyObj('ProductService', [
-      'getProductById',
-      'createProduct',
-      'updateProduct',
-      'checkIdExists'
-    ]);
+    const productServiceSpy = {
+      getProductById: jest.fn(),
+      createProduct: jest.fn(),
+      updateProduct: jest.fn(),
+      checkIdExists: jest.fn()
+    } as unknown as jest.Mocked<ProductService>;
 
-    const notificationServiceSpy = jasmine.createSpyObj('NotificationService', [
-      'showSuccess',
-      'showError'
-    ]);
+    const notificationServiceSpy = {
+      showSuccess: jest.fn(),
+      showError: jest.fn()
+    } as unknown as jest.Mocked<NotificationService>;
 
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const routerSpy = {
+      navigate: jest.fn()
+    } as unknown as jest.Mocked<Router>;
 
     // ActivatedRoute mock
     activatedRoute = {
       snapshot: {
         paramMap: {
-          get: jasmine.createSpy('get').and.returnValue(null)
+          get: jest.fn().mockReturnValue(null)
         }
       }
     };
@@ -65,9 +67,9 @@ describe('ProductFormComponent', () => {
 
     fixture = TestBed.createComponent(ProductFormComponent);
     component = fixture.componentInstance;
-    productService = TestBed.inject(ProductService) as jasmine.SpyObj<ProductService>;
-    notificationService = TestBed.inject(NotificationService) as jasmine.SpyObj<NotificationService>;
-    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    productService = TestBed.inject(ProductService) as jest.Mocked<ProductService>;
+    notificationService = TestBed.inject(NotificationService) as jest.Mocked<NotificationService>;
+    router = TestBed.inject(Router) as jest.Mocked<Router>;
   });
 
   afterEach(() => {
@@ -85,7 +87,7 @@ describe('ProductFormComponent', () => {
 
     it('debería inicializar en modo creación (no edición)', () => {
       fixture.detectChanges();
-      expect(component.isEditMode()).toBeFalse();
+      expect(component.isEditMode()).toBe(false);
       expect(component.productId()).toBeNull();
     });
 
@@ -116,7 +118,7 @@ describe('ProductFormComponent', () => {
         const control = component.productForm.get('id');
         control?.setValue('');
         control?.markAsTouched();
-        expect(control?.hasError('required')).toBeTrue();
+        expect(control?.hasError('required')).toBe(true);
         expect(component.getErrorMessage('id')).toBe('ID requerido');
       });
 
@@ -124,21 +126,21 @@ describe('ProductFormComponent', () => {
         const control = component.productForm.get('id');
         control?.setValue('ab');
         control?.markAsTouched();
-        expect(control?.hasError('minlength')).toBeTrue();
+        expect(control?.hasError('minlength')).toBe(true);
       });
 
       it('debería limitar a máximo 10 caracteres', () => {
         const control = component.productForm.get('id');
         control?.setValue('id-muy-largo-123');
         control?.markAsTouched();
-        expect(control?.hasError('maxlength')).toBeTrue();
+        expect(control?.hasError('maxlength')).toBe(true);
       });
 
       it('debería aceptar ID válido (3-10 caracteres)', () => {
         const control = component.productForm.get('id');
         control?.setValue('trj-crd');
-        expect(control?.hasError('minlength')).toBeFalse();
-        expect(control?.hasError('maxlength')).toBeFalse();
+        expect(control?.hasError('minlength')).toBe(false);
+        expect(control?.hasError('maxlength')).toBe(false);
       });
     });
 
@@ -147,14 +149,14 @@ describe('ProductFormComponent', () => {
         const control = component.productForm.get('name');
         control?.setValue('');
         control?.markAsTouched();
-        expect(control?.hasError('required')).toBeTrue();
+        expect(control?.hasError('required')).toBe(true);
       });
 
       it('debería requerir mínimo 5 caracteres', () => {
         const control = component.productForm.get('name');
         control?.setValue('Test');
         control?.markAsTouched();
-        expect(control?.hasError('minlength')).toBeTrue();
+        expect(control?.hasError('minlength')).toBe(true);
         expect(component.getErrorMessage('name')).toContain('Mínimo 5');
       });
 
@@ -162,13 +164,13 @@ describe('ProductFormComponent', () => {
         const control = component.productForm.get('name');
         control?.setValue('a'.repeat(101));
         control?.markAsTouched();
-        expect(control?.hasError('maxlength')).toBeTrue();
+        expect(control?.hasError('maxlength')).toBe(true);
       });
 
       it('debería aceptar nombre válido', () => {
         const control = component.productForm.get('name');
         control?.setValue('Tarjeta de Crédito');
-        expect(control?.valid).toBeTrue();
+        expect(control?.valid).toBe(true);
       });
     });
 
@@ -177,27 +179,27 @@ describe('ProductFormComponent', () => {
         const control = component.productForm.get('description');
         control?.setValue('');
         control?.markAsTouched();
-        expect(control?.hasError('required')).toBeTrue();
+        expect(control?.hasError('required')).toBe(true);
       });
 
       it('debería requerir mínimo 10 caracteres', () => {
         const control = component.productForm.get('description');
         control?.setValue('Corta');
         control?.markAsTouched();
-        expect(control?.hasError('minlength')).toBeTrue();
+        expect(control?.hasError('minlength')).toBe(true);
       });
 
       it('debería limitar a máximo 200 caracteres', () => {
         const control = component.productForm.get('description');
         control?.setValue('a'.repeat(201));
         control?.markAsTouched();
-        expect(control?.hasError('maxlength')).toBeTrue();
+        expect(control?.hasError('maxlength')).toBe(true);
       });
 
       it('debería aceptar descripción válida', () => {
         const control = component.productForm.get('description');
         control?.setValue('Descripción válida del producto');
-        expect(control?.valid).toBeTrue();
+        expect(control?.valid).toBe(true);
       });
     });
 
@@ -206,20 +208,20 @@ describe('ProductFormComponent', () => {
         const control = component.productForm.get('logo');
         control?.setValue('');
         control?.markAsTouched();
-        expect(control?.hasError('required')).toBeTrue();
+        expect(control?.hasError('required')).toBe(true);
       });
 
       it('debería validar formato URL', () => {
         const control = component.productForm.get('logo');
         control?.setValue('no-es-url');
         control?.markAsTouched();
-        expect(control?.hasError('pattern')).toBeTrue();
+        expect(control?.hasError('pattern')).toBe(true);
       });
 
       it('debería aceptar URL válida', () => {
         const control = component.productForm.get('logo');
         control?.setValue('https://example.com/logo.png');
-        expect(control?.valid).toBeTrue();
+        expect(control?.valid).toBe(true);
       });
     });
 
@@ -228,7 +230,7 @@ describe('ProductFormComponent', () => {
         const control = component.productForm.get('date_release');
         control?.setValue('');
         control?.markAsTouched();
-        expect(control?.hasError('required')).toBeTrue();
+        expect(control?.hasError('required')).toBe(true);
       });
 
       it('debería rechazar fechas pasadas', () => {
@@ -237,7 +239,7 @@ describe('ProductFormComponent', () => {
         yesterday.setDate(yesterday.getDate() - 1);
         control?.setValue(yesterday.toISOString().split('T')[0]);
         control?.markAsTouched();
-        expect(control?.hasError('pastDate')).toBeTrue();
+        expect(control?.hasError('pastDate')).toBe(true);
       });
 
       it('debería aceptar fecha de hoy', () => {
@@ -245,7 +247,7 @@ describe('ProductFormComponent', () => {
         const today = new Date().toISOString().split('T')[0];
         control?.setValue(today);
         control?.markAsTouched();
-        expect(control?.hasError('pastDate')).toBeFalse();
+        expect(control?.hasError('pastDate')).toBe(false);
       });
     });
   });
@@ -259,32 +261,32 @@ describe('ProductFormComponent', () => {
     });
 
     it('debería validar que ID no existe', fakeAsync(() => {
-      productService.checkIdExists.and.returnValue(of(false));
+      productService.checkIdExists.mockReturnValue(of(false));
       
       const control = component.productForm.get('id');
       control?.setValue('nuevo-id');
       tick(400); // Debounce de 300ms
       
       expect(productService.checkIdExists).toHaveBeenCalledWith('nuevo-id');
-      expect(control?.hasError('idExists')).toBeFalse();
+      expect(control?.hasError('idExists')).toBe(false);
       flush();
     }));
 
     it('debería mostrar error si ID ya existe', fakeAsync(() => {
-      productService.checkIdExists.and.returnValue(of(true));
+      productService.checkIdExists.mockReturnValue(of(true));
       
       const control = component.productForm.get('id');
       control?.setValue('existente');
       tick(400);
       
-      expect(control?.hasError('idExists')).toBeTrue();
+      expect(control?.hasError('idExists')).toBe(true);
       expect(component.getErrorMessage('id')).toContain('no válido');
       flush();
     }));
 
     it('no debería validar en modo edición', fakeAsync(() => {
-      activatedRoute.snapshot.paramMap.get.and.returnValue('trj-crd');
-      productService.getProductById.and.returnValue(of(mockProduct));
+      activatedRoute.snapshot.paramMap.get.mockReturnValue('trj-crd');
+      productService.getProductById.mockReturnValue(of(mockProduct));
       
       // Recrear componente con ID
       fixture = TestBed.createComponent(ProductFormComponent);
@@ -292,7 +294,7 @@ describe('ProductFormComponent', () => {
       fixture.detectChanges();
       tick();
       
-      expect(component.isEditMode()).toBeTrue();
+      expect(component.isEditMode()).toBe(true);
       expect(productService.checkIdExists).not.toHaveBeenCalled();
     }));
   });
@@ -333,7 +335,7 @@ describe('ProductFormComponent', () => {
       component.productForm.get('date_release')?.setValue('2024-06-15');
       component.productForm.get('date_revision')?.setValue('2025-06-16'); // 1 día más
       
-      expect(component.productForm.hasError('revisionDateInvalid')).toBeTrue();
+      expect(component.productForm.hasError('revisionDateInvalid')).toBe(true);
     });
   });
 
@@ -365,7 +367,7 @@ describe('ProductFormComponent', () => {
         date_revision: '2025-12-01'
       };
 
-      productService.createProduct.and.returnValue(of({ message: 'Created' } as any));
+      productService.createProduct.mockReturnValue(of({ message: 'Created' } as any));
       
       component.productForm.patchValue(newProduct);
       component.onSubmit();
@@ -377,14 +379,14 @@ describe('ProductFormComponent', () => {
     }));
 
     it('debería mostrar error si falla la creación', fakeAsync(() => {
-      productService.createProduct.and.returnValue(throwError(() => new Error('Error')));
+      productService.createProduct.mockReturnValue(throwError(() => new Error('Error')));
       
       component.productForm.patchValue(mockProduct);
       component.onSubmit();
       tick();
       
       expect(notificationService.showError).toHaveBeenCalled();
-      expect(component.isSubmitting()).toBeFalse();
+      expect(component.isSubmitting()).toBe(false);
     }));
   });
 
@@ -393,15 +395,15 @@ describe('ProductFormComponent', () => {
   // ============================================
   describe('Modo Edición', () => {
     beforeEach(fakeAsync(() => {
-      activatedRoute.snapshot.paramMap.get.and.returnValue('trj-crd');
-      productService.getProductById.and.returnValue(of(mockProduct));
+      activatedRoute.snapshot.paramMap.get.mockReturnValue('trj-crd');
+      productService.getProductById.mockReturnValue(of(mockProduct));
       
       fixture.detectChanges();
       tick();
     }));
 
     it('debería cargar en modo edición', () => {
-      expect(component.isEditMode()).toBeTrue();
+      expect(component.isEditMode()).toBe(true);
       expect(component.productId()).toBe('trj-crd');
     });
 
@@ -411,22 +413,22 @@ describe('ProductFormComponent', () => {
     });
 
     it('debería deshabilitar campo ID en modo edición', () => {
-      expect(component.productForm.get('id')?.disabled).toBeTrue();
+      expect(component.productForm.get('id')?.disabled).toBe(true);
     });
 
     it('debería actualizar producto existente', fakeAsync(() => {
-      productService.updateProduct.and.returnValue(of({ message: 'Updated' } as any));
+      productService.updateProduct.mockReturnValue(of({ message: 'Updated' } as any));
       
       component.productForm.get('name')?.setValue('Nombre Actualizado');
       component.onSubmit();
       tick();
       
-      expect(productService.updateProduct).toHaveBeenCalledWith('trj-crd', jasmine.any(Object));
+      expect(productService.updateProduct).toHaveBeenCalledWith('trj-crd', expect.any(Object));
       expect(notificationService.showSuccess).toHaveBeenCalledWith('Producto actualizado exitosamente');
     }));
 
     it('debería redirigir si producto no existe', fakeAsync(() => {
-      productService.getProductById.and.returnValue(of(undefined));
+      productService.getProductById.mockReturnValue(of(undefined));
       
       fixture = TestBed.createComponent(ProductFormComponent);
       component = fixture.componentInstance;
@@ -455,8 +457,8 @@ describe('ProductFormComponent', () => {
     });
 
     it('debería recargar datos en modo edición', fakeAsync(() => {
-      activatedRoute.snapshot.paramMap.get.and.returnValue('trj-crd');
-      productService.getProductById.and.returnValue(of(mockProduct));
+      activatedRoute.snapshot.paramMap.get.mockReturnValue('trj-crd');
+      productService.getProductById.mockReturnValue(of(mockProduct));
       
       fixture = TestBed.createComponent(ProductFormComponent);
       component = fixture.componentInstance;
@@ -484,7 +486,7 @@ describe('ProductFormComponent', () => {
       control?.setValue('');
       control?.markAsTouched();
       
-      expect(component.isFieldInvalid('name')).toBeTrue();
+      expect(component.isFieldInvalid('name')).toBe(true);
     });
 
     it('debería verificar error específico', () => {
@@ -492,22 +494,22 @@ describe('ProductFormComponent', () => {
       control?.setValue('ab');
       control?.markAsTouched();
       
-      expect(component.hasError('id', 'minlength')).toBeTrue();
-      expect(component.hasError('id', 'required')).toBeFalse();
+      expect(component.hasError('id', 'minlength')).toBe(true);
+      expect(component.hasError('id', 'required')).toBe(false);
     });
 
     it('debería deshabilitar submit cuando está enviando', () => {
       component.isSubmitting.set(true);
       fixture.detectChanges();
       
-      expect(component.isSubmitting()).toBeTrue();
+      expect(component.isSubmitting()).toBe(true);
     });
 
     it('debería marcar todos los campos como touched', () => {
       component.markAllAsTouched();
       
       Object.values(component.productForm.controls).forEach(control => {
-        expect(control.touched).toBeTrue();
+        expect(control.touched).toBe(true);
       });
     });
   });
