@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';
-import { Product, ProductResponse, ProductRequest, IdVerificationResponse, ProductFilters } from '../models/product.model';
+import { Product, ProductResponse, ProductRequest, IdVerificationResponse, ProductFilters, ApiResponse } from '../models/product.model';
 
 /**
  * Servicio para gestionar productos financieros
@@ -46,23 +46,27 @@ export class ProductService {
 
   /**
    * Crea un nuevo producto
+   * El backend retorna { message: string, data: Product }
    * @param product Datos del producto a crear
    * @returns Observable con el producto creado
    */
   createProduct(product: ProductRequest): Observable<Product> {
-    return this.http.post<Product>(`${this.apiUrl}/bp/products`, product).pipe(
+    return this.http.post<ApiResponse<Product>>(`${this.apiUrl}/bp/products`, product).pipe(
+      map(response => response.data),
       catchError(this.handleError)
     );
   }
 
   /**
    * Actualiza un producto existente
+   * El backend retorna { message: string, data: Product }
    * @param id ID del producto
    * @param product Datos actualizados
    * @returns Observable con el producto actualizado
    */
   updateProduct(id: string, product: Partial<ProductRequest>): Observable<Product> {
-    return this.http.put<Product>(`${this.apiUrl}/bp/products/${id}`, product).pipe(
+    return this.http.put<ApiResponse<Product>>(`${this.apiUrl}/bp/products/${id}`, product).pipe(
+      map(response => response.data),
       catchError(this.handleError)
     );
   }

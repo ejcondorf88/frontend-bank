@@ -152,12 +152,12 @@ describe('ProductFormComponent', () => {
         expect(control?.hasError('required')).toBe(true);
       });
 
-      it('debería requerir mínimo 5 caracteres', () => {
+      it('debería requerir mínimo 6 caracteres', () => {
         const control = component.productForm.get('name');
         control?.setValue('Test');
         control?.markAsTouched();
         expect(control?.hasError('minlength')).toBe(true);
-        expect(component.getErrorMessage('name')).toContain('Mínimo 5');
+        expect(component.getErrorMessage('name')).toContain('Mínimo 6');
       });
 
       it('debería limitar a máximo 100 caracteres', () => {
