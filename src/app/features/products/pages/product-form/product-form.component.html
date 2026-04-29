@@ -83,6 +83,12 @@
           @if (hasError('description', 'required')) {
             <span class="error-message">Este campo es requerido</span>
           }
+          @if (hasError('description', 'minlength')) {
+            <span class="error-message">Mínimo 10 caracteres</span>
+          }
+          @if (hasError('description', 'maxlength')) {
+            <span class="error-message">Máximo 200 caracteres</span>
+          }
         </div>
 
         <!-- Logo -->
@@ -98,7 +104,7 @@
             <span class="error-message">Este campo es requerido</span>
           }
           @if (hasError('logo', 'pattern')) {
-            <span class="error-message">Este campo es requerido</span>
+            <span class="error-message">Ingresa una URL válida</span>
           }
         </div>
       </div>

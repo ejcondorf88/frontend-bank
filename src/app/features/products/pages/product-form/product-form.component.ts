@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router, ActivatedRoute } from '@angular/router';
 import { 
@@ -27,10 +27,16 @@ import { NotificationService } from '../../../../core/services/notification.serv
  * - Logo: requerido, URL válida
  * - Fecha Liberación: requerido, >= hoy
  * - Fecha Revisión: requerido, exactamente 1 año después
+ *
+ * Estrategia: ChangeDetectionStrategy.OnPush
+ * El estado del formulario se maneja con ReactiveForms (no Signals directas),
+ * pero las signals de UI (isSubmitting, isEditMode, etc.) se benefician de OnPush
+ * al no disparar detección de cambios innecesaria en el árbol de componentes.
  */
 @Component({
   selector: 'app-product-form',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,

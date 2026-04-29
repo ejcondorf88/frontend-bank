@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
@@ -11,10 +11,16 @@ import { NotificationService } from '../../../../core/services/notification.serv
  * Componente principal de listado de productos
  * Historia SS-001: Listado de Productos con búsqueda, filtrado y paginación
  * Diseño D1: Tabla de productos según especificación
+ *
+ * Estrategia: ChangeDetectionStrategy.OnPush
+ * Los componentes solo se actualizan cuando una señal cambia o un input se modifica.
+ * Al usar Signals para TODO el estado interno, el renderizado es quirúrgico:
+ * solo el componente cuya señal cambió se actualiza, no todo el árbol.
  */
 @Component({
   selector: 'app-products-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,
