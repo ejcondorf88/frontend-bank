@@ -1,0 +1,208 @@
+// Variables del diseño D2
+$form-bg: #ffffff;
+$page-bg: #f3f4f6;
+$text-primary: #1f2937;
+$text-secondary: #6b7280;
+$border-color: #d1d5db;
+$border-error: #ef4444;
+$error-color: #ef4444;
+$btn-restart-bg: #e5e7eb;
+$btn-restart-text: #374151;
+$btn-submit-bg: #fde047;
+$btn-submit-text: #1f2937;
+$input-focus: #3b82f6;
+
+// Page Container
+.form-page {
+  min-height: 100vh;
+  background-color: $page-bg;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// Header
+.form-header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $border-color;
+  width: 100%;
+  max-width: 600px;
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0;
+  }
+}
+
+// Loading State
+.loading-state {
+  text-align: center;
+  padding: 48px;
+  color: $text-secondary;
+}
+
+// Form Container
+.form-container {
+  background-color: $form-bg;
+  padding: 32px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+// Form Row
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Form Field
+.form-field {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: $text-secondary;
+    margin-bottom: 4px;
+    text-transform: none;
+  }
+
+  input {
+    padding: 10px 12px;
+    border: 1px solid $border-color;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: $text-primary;
+    background-color: #ffffff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &::placeholder {
+      color: #9ca3af;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $input-focus;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+
+    &:disabled {
+      background-color: #f3f4f6;
+      cursor: not-allowed;
+      color: $text-secondary;
+    }
+
+    &.readonly {
+      background-color: #f3f4f6;
+      color: $text-secondary;
+    }
+  }
+
+  // Estado de error
+  &.has-error {
+    input {
+      border-color: $border-error;
+      
+      &:focus {
+        border-color: $border-error;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+      }
+    }
+
+    label {
+      color: $error-color;
+    }
+  }
+}
+
+// Error Message
+.error-message {
+  display: block;
+  font-size: 0.6875rem;
+  color: $error-color;
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+// Form Actions
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 16px;
+}
+
+// Botón Reiniciar
+.btn-restart {
+  padding: 10px 24px;
+  background-color: $btn-restart-bg;
+  color: $btn-restart-text;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background-color: darken($btn-restart-bg, 5%);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Botón Enviar
+.btn-submit {
+  padding: 10px 32px;
+  background-color: $btn-submit-bg;
+  color: $btn-submit-text;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background-color: #fcd34d;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Responsive
+@media (max-width: 640px) {
+  .form-container {
+    padding: 20px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+
+    button {
+      width: 100%;
+    }
+  }
+}

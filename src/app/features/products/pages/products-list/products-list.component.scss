@@ -61,9 +61,15 @@
 // Search Section
 .search-section {
   margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .search-box {
+  flex: 1;
   max-width: 300px;
 
   .search-input {
@@ -85,6 +91,34 @@
       border-color: var(--color-accent);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
+  }
+}
+
+// Botón Agregar (Diseño D3)
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  background-color: #fbbf24; // Amarillo del diseño D3
+  color: #1f2937;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: #f59e0b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(251, 191, 36, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
   }
 }
 

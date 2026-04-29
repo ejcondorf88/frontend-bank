@@ -13,7 +13,7 @@
 
   <!-- Contenido principal -->
   <main class="main-content">
-    <!-- Barra de búsqueda -->
+    <!-- Barra de búsqueda y botón Agregar (D3) -->
     <div class="search-section">
       <div class="search-box">
         <input
@@ -24,6 +24,11 @@
           class="search-input"
         />
       </div>
+      
+      <!-- Botón Agregar - Diseño D3 -->
+      <a routerLink="/products/new" class="btn-add">
+        Agregar
+      </a>
     </div>
 
     <!-- Tabla de productos -->
@@ -105,6 +110,9 @@
                 <td class="col-description">{{ product.description }}</td>
                 <td class="col-date">{{ formatDate(product.date_release) }}</td>
                 <td class="col-date">{{ formatDate(product.date_revision) }}</td>
+                <td class="col-actions">
+                  <button class="btn-menu" title="Más opciones">⋮</button>
+                </td>
               </tr>
             }
           </tbody>
