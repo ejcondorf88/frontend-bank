@@ -5,7 +5,7 @@ import { DashboardStore } from '../../signals/dashboard.store';
 import { AuthStore } from '../../../auth/signals/auth.store';
 import { CardComponent } from '../../../../shared/ui/card/card.component';
 import { ButtonComponent } from '../../../../shared/ui/button/button.component';
-import { CurrencyFormatPipe } from '../../../../shared/pipes/currency-format.pipe';
+import { CurrencyFormatPipe, CurrencyCode } from '../../../../shared/pipes/currency-format.pipe';
 
 interface DashboardStats {
   totalBalance: number;
@@ -20,7 +20,7 @@ interface Account {
   name: string;
   type: 'checking' | 'savings' | 'credit';
   balance: number;
-  currency: string;
+  currency: CurrencyCode;
   lastUpdated: Date;
   status: 'active' | 'inactive' | 'blocked';
   number: string;

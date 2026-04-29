@@ -1,11 +1,12 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
+import { CurrencyCode } from '../../../shared/pipes/currency-format.pipe';
 
 interface Account {
   id: string;
   name: string;
   type: 'checking' | 'savings' | 'credit';
   balance: number;
-  currency: string;
+  currency: CurrencyCode;
   lastUpdated: Date;
   status: 'active' | 'inactive' | 'blocked';
   number: string;

@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'JPY' | 'MXN' | 'ARS' | 'BRL' | 'CLP' | 'COP';
+export type CurrencyCode = 'USD' | 'EUR' | 'GBP' | 'JPY' | 'MXN' | 'ARS' | 'BRL' | 'CLP' | 'COP';
 
 interface CurrencyConfig {
   symbol: string;

@@ -6,6 +6,7 @@ import {
   RouterStateSnapshot
 } from '@angular/router';
 import { StorageService } from '../services/storage.service';
+import { User } from '../models/user.model';
 
 export const authGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
@@ -14,10 +15,10 @@ export const authGuard: CanActivateFn = (
   const storageService = inject(StorageService);
   const router = inject(Router);
 
-  const token = storageService.getItem('access_token');
-  const user = storageService.getItem('user');
+  const token = storageService.getItem<string>('access_token');
+  const user = storageService.getItem<User>('user');
 
-  if (token && user) {
+  if (token && typeof token === 'string' && user) {
     // Verificar si el token no ha expirado
     const tokenData = parseJwt(token);
     if (tokenData && tokenData.exp * 1000 > Date.now()) {
@@ -58,8 +59,8 @@ export const publicGuard: CanActivateFn = () => {
   const storageService = inject(StorageService);
   const router = inject(Router);
 
-  const token = storageService.getItem('access_token');
-  
+  const token = storageService.getItem<string>('access_token');
+
   if (token) {
     return router.createUrlTree(['/dashboard']);
   }
