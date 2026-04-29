@@ -13,7 +13,8 @@ describe('NotificationService', () => {
 
   afterEach(() => {
     service.clearAll();
-    flush();
+    // No llamar flush() aquí porque solo funciona dentro de fakeAsync.
+    // Cada test que usa fakeAsync debe limpiar sus propios timers.
   });
 
   describe('Creación', () => {
@@ -56,10 +57,10 @@ describe('NotificationService', () => {
       expect(service.notifications()[0].type).toBe('info');
     });
 
-    it('debería asignar duración por defecto de 5000ms', fakeAsync(() => {
+    it('debería asignar duración por defecto de 5000ms', () => {
       service.show('Test message');
       expect(service.notifications()[0].duration).toBe(5000);
-    }));
+    });
 
     it('debería permitir personalizar el tipo', () => {
       service.show('Test message', 'success');

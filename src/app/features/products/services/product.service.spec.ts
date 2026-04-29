@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ProductService } from './product.service';
 import { Product } from '../models/product.model';
@@ -8,7 +8,6 @@ describe('ProductService', () => {
   let httpMock: HttpTestingController;
   const apiUrl = 'http://localhost:3002';
 
-  // Datos de prueba
   const mockProducts: Product[] = [
     {
       id: 'trj-crd',
@@ -49,9 +48,6 @@ describe('ProductService', () => {
     httpMock.verify();
   });
 
-  // ============================================
-  // TESTS F1: Listado de productos
-  // ============================================
   describe('F1 - getProducts', () => {
     it('debería obtener la lista de productos desde la API', () => {
       service.getProducts().subscribe(products => {
@@ -89,132 +85,187 @@ describe('ProductService', () => {
     });
   });
 
-  // ============================================
-  // TESTS F2: Búsqueda de productos
-  // ============================================
-  describe('F2 - searchProducts', () => {
-    beforeEach(() => {
-      // Mock inicial de productos
-      service.getProducts().subscribe();
-      const req = httpMock.expectOne(`${apiUrl}/bp/products`);
-      req.flush({ data: mockProducts });
+describe('F2 - searchProducts', () => {
+  it('debería buscar productos por nombre', fakeAsync(() => {
+    let result: Product[] = [];
+    service.searchProducts('Tarjeta').subscribe(products => {
+      result = products;
     });
+    
+    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    req.flush({ data: mockProducts });
+    tick();
+    
+    expect(result.length).toBe(1);
+    expect(result[0].name).toBe('Tarjetas de Crédito');
+    flush();
+  }));
 
-    it('debería buscar productos por nombre', (done) => {
-      service.searchProducts('Tarjeta').subscribe(products => {
-        expect(products.length).toBe(1);
-        expect(products[0].name).toBe('Tarjetas de Crédito');
-        done();
-      });
+  it('debería buscar productos por descripción', fakeAsync(() => {
+    let result: Product[] = [];
+    service.searchProducts('ahorro').subscribe(products => {
+      result = products;
     });
+    
+    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    req.flush({ data: mockProducts });
+    tick();
+    
+    expect(result.length).toBe(1);
+    expect(result[0].name).toBe('Cuenta de Ahorro');
+    flush();
+  }));
 
-    it('debería buscar productos por descripción', (done) => {
-      service.searchProducts('ahorro').subscribe(products => {
-        expect(products.length).toBe(1);
-        expect(products[0].name).toBe('Cuenta de Ahorro');
-        done();
-      });
+  it('debería ser case-insensitive', fakeAsync(() => {
+    let result: Product[] = [];
+    service.searchProducts('TARJETA').subscribe(products => {
+      result = products;
     });
+    
+    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    req.flush({ data: mockProducts });
+    tick();
+    
+    expect(result.length).toBe(1);
+    flush();
+  }));
 
-    it('debería ser case-insensitive', (done) => {
-      service.searchProducts('TARJETA').subscribe(products => {
-        expect(products.length).toBe(1);
-        done();
-      });
+  it('debería retornar todos los productos si la búsqueda está vacía', fakeAsync(() => {
+    let result: Product[] = [];
+    service.searchProducts('').subscribe(products => {
+      result = products;
     });
+    
+    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    req.flush({ data: mockProducts });
+    tick();
+    
+    expect(result.length).toBe(3);
+    flush();
+  }));
 
-    it('debería retornar todos los productos si la búsqueda está vacía', (done) => {
-      service.searchProducts('').subscribe(products => {
-        expect(products.length).toBe(3);
-        done();
-      });
+  it('debería retornar array vacío si no hay coincidencias', fakeAsync(() => {
+    let result: Product[] = [];
+    service.searchProducts('xyz').subscribe(products => {
+      result = products;
     });
+    
+    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    req.flush({ data: mockProducts });
+    tick();
+    
+    expect(result.length).toBe(0);
+    flush();
+  }));
 
-    it('debería retornar array vacío si no hay coincidencias', (done) => {
-      service.searchProducts('xyz').subscribe(products => {
-        expect(products.length).toBe(0);
-        done();
-      });
+  it('debería buscar en ID también', fakeAsync(() => {
+    let result: Product[] = [];
+    service.searchProducts('trj').subscribe(products => {
+      result = products;
     });
+    
+    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    req.flush({ data: mockProducts });
+    tick();
+    
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe('trj-crd');
+    flush();
+  }));
+});
 
-    it('debería buscar en ID también', (done) => {
-      service.searchProducts('trj').subscribe(products => {
-        expect(products.length).toBe(1);
-        expect(products[0].id).toBe('trj-crd');
-        done();
-      });
+describe('F3 - getProductsWithFilters', () => {
+  it('debería filtrar por campo de búsqueda', fakeAsync(() => {
+    let result: Product[] = [];
+    service.getProductsWithFilters({ search: 'Cuenta' }).subscribe(products => {
+      result = products;
     });
-  });
+    
+    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    req.flush({ data: mockProducts });
+    tick();
+    
+    expect(result.length).toBe(2);
+    flush();
+  }));
 
-  // ============================================
-  // TESTS F3: Filtrado y Ordenamiento
-  // ============================================
-  describe('F3 - getProductsWithFilters', () => {
-    beforeEach(() => {
-      service.getProducts().subscribe();
-      const req = httpMock.expectOne(`${apiUrl}/bp/products`);
-      req.flush({ data: mockProducts });
+  it('debería ordenar por nombre ascendente', fakeAsync(() => {
+    let result: Product[] = [];
+    service.getProductsWithFilters({
+      sortBy: 'name',
+      sortOrder: 'asc'
+    }).subscribe(products => {
+      result = products;
     });
+    
+    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    req.flush({ data: mockProducts });
+    tick();
+    
+    expect(result[0].name).toBe('Cuenta Corriente');
+    expect(result[1].name).toBe('Cuenta de Ahorro');
+    expect(result[2].name).toBe('Tarjetas de Crédito');
+    flush();
+  }));
 
-    it('debería filtrar por campo de búsqueda', (done) => {
-      service.getProductsWithFilters({ search: 'Cuenta' }).subscribe(products => {
-        expect(products.length).toBe(2); // Cuenta de Ahorro y Cuenta Corriente
-        done();
-      });
+  it('debería ordenar por nombre descendente', fakeAsync(() => {
+    let result: Product[] = [];
+    service.getProductsWithFilters({
+      sortBy: 'name',
+      sortOrder: 'desc'
+    }).subscribe(products => {
+      result = products;
     });
+    
+    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    req.flush({ data: mockProducts });
+    tick();
+    
+    expect(result[0].name).toBe('Tarjetas de Crédito');
+    expect(result[2].name).toBe('Cuenta Corriente');
+    flush();
+  }));
 
-    it('debería ordenar por nombre ascendente', (done) => {
-      service.getProductsWithFilters({ 
-        sortBy: 'name', 
-        sortOrder: 'asc' 
-      }).subscribe(products => {
-        expect(products[0].name).toBe('Cuenta Corriente');
-        expect(products[1].name).toBe('Cuenta de Ahorro');
-        expect(products[2].name).toBe('Tarjetas de Crédito');
-        done();
-      });
+  it('debería ordenar por fecha de liberación', fakeAsync(() => {
+    let result: Product[] = [];
+    service.getProductsWithFilters({
+      sortBy: 'date_release',
+      sortOrder: 'asc'
+    }).subscribe(products => {
+      result = products;
     });
+    
+    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    req.flush({ data: mockProducts });
+    tick();
+    
+    expect(result[0].date_release).toBe('2024-01-15');
+    expect(result[1].date_release).toBe('2024-02-01');
+    expect(result[2].date_release).toBe('2024-03-01');
+    flush();
+  }));
 
-    it('debería ordenar por nombre descendente', (done) => {
-      service.getProductsWithFilters({ 
-        sortBy: 'name', 
-        sortOrder: 'desc' 
-      }).subscribe(products => {
-        expect(products[0].name).toBe('Tarjetas de Crédito');
-        expect(products[2].name).toBe('Cuenta Corriente');
-        done();
-      });
+  it('debería filtrar y ordenar combinado', fakeAsync(() => {
+    let result: Product[] = [];
+    service.getProductsWithFilters({
+      search: 'Cuenta',
+      sortBy: 'name',
+      sortOrder: 'asc'
+    }).subscribe(products => {
+      result = products;
     });
+    
+    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    req.flush({ data: mockProducts });
+    tick();
+    
+    expect(result.length).toBe(2);
+    expect(result[0].name).toBe('Cuenta Corriente');
+    expect(result[1].name).toBe('Cuenta de Ahorro');
+    flush();
+  }));
+});
 
-    it('debería ordenar por fecha de liberación', (done) => {
-      service.getProductsWithFilters({ 
-        sortBy: 'date_release', 
-        sortOrder: 'asc' 
-      }).subscribe(products => {
-        expect(products[0].date_release).toBe('2024-01-15');
-        expect(products[1].date_release).toBe('2024-02-01');
-        expect(products[2].date_release).toBe('2024-03-01');
-        done();
-      });
-    });
-
-    it('debería filtrar y ordenar combinado', (done) => {
-      service.getProductsWithFilters({ 
-        search: 'Cuenta',
-        sortBy: 'name', 
-        sortOrder: 'asc' 
-      }).subscribe(products => {
-        expect(products.length).toBe(2);
-        expect(products[0].name).toBe('Cuenta Corriente');
-        expect(products[1].name).toBe('Cuenta de Ahorro');
-        done();
-      });
-    });
-  });
-
-  // ============================================
-  // TESTS: Validaciones de Fechas
-  // ============================================
   describe('Validaciones de Fechas', () => {
     it('debería calcular fecha de revisión correctamente', () => {
       const releaseDate = '2024-01-15';
@@ -222,13 +273,15 @@ describe('ProductService', () => {
       expect(revisionDate).toBe('2025-01-15');
     });
 
-    it('debería validar fechas correctas', () => {
-      const today = new Date().toISOString().split('T')[0];
-      const revision = service.calculateRevisionDate(today);
-      
-      const result = service.validateDates(today, revision);
-      expect(result.valid).toBeTrue();
-    });
+  it('debería validar fechas correctas', () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayStr = today.toISOString().split('T')[0];
+    const revision = service.calculateRevisionDate(todayStr);
+
+    const result = service.validateDates(todayStr, revision);
+    expect(result.valid).toBe(true);
+  });
 
     it('debería rechazar fecha liberación anterior a hoy', () => {
       const yesterday = new Date();
@@ -236,24 +289,26 @@ describe('ProductService', () => {
       const releaseDate = yesterday.toISOString().split('T')[0];
       
       const result = service.validateDates(releaseDate, '2025-01-01');
-      expect(result.valid).toBeFalse();
+      expect(result.valid).toBe(false);
       expect(result.error).toContain('fecha de liberación debe ser hoy o posterior');
     });
 
-    it('debería rechazar fecha revisión diferente a 1 año', () => {
-      const today = new Date().toISOString().split('T')[0];
-      const wrongRevision = new Date();
-      wrongRevision.setFullYear(wrongRevision.getFullYear() + 2);
-      
-      const result = service.validateDates(today, wrongRevision.toISOString().split('T')[0]);
-      expect(result.valid).toBeFalse();
-      expect(result.error).toContain('exactamente 1 año después');
-    });
+  it('debería rechazar fecha revisión diferente a 1 año', () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    const releaseStr = tomorrow.toISOString().split('T')[0];
+    
+    // Fecha de revisión 2 años después (incorrecta)
+    const wrongRevision = new Date(tomorrow);
+    wrongRevision.setFullYear(wrongRevision.getFullYear() + 2);
+
+    const result = service.validateDates(releaseStr, wrongRevision.toISOString().split('T')[0]);
+    expect(result.valid).toBe(false);
+    expect(result.error).toContain('exactamente 1 año después');
+  });
   });
 
-  // ============================================
-  // TESTS: CRUD Operations
-  // ============================================
   describe('CRUD Operations', () => {
     const newProduct: Product = {
       id: 'new-prd',
@@ -289,7 +344,7 @@ describe('ProductService', () => {
 
     it('debería eliminar un producto', () => {
       service.deleteProduct('trj-crd').subscribe(() => {
-        expect(true).toBeTrue();
+        expect(true).toBe(true);
       });
 
       const req = httpMock.expectOne(`${apiUrl}/bp/products/trj-crd`);
@@ -299,7 +354,7 @@ describe('ProductService', () => {
 
     it('debería verificar si ID existe', () => {
       service.checkIdExists('existing-id').subscribe(exists => {
-        expect(exists).toBeTrue();
+        expect(exists).toBe(true);
       });
 
       const req = httpMock.expectOne(`${apiUrl}/bp/products/verification/existing-id`);
@@ -309,7 +364,7 @@ describe('ProductService', () => {
 
     it('debería verificar si ID no existe', () => {
       service.checkIdExists('new-id').subscribe(exists => {
-        expect(exists).toBeFalse();
+        expect(exists).toBe(false);
       });
 
       const req = httpMock.expectOne(`${apiUrl}/bp/products/verification/new-id`);
@@ -317,29 +372,34 @@ describe('ProductService', () => {
     });
   });
 
-  // ============================================
-  // TESTS: Obtener producto por ID
-  // ============================================
-  describe('getProductById', () => {
-    beforeEach(() => {
-      service.getProducts().subscribe();
-      const req = httpMock.expectOne(`${apiUrl}/bp/products`);
-      req.flush({ data: mockProducts });
+describe('getProductById', () => {
+  it('debería encontrar producto por ID', fakeAsync(() => {
+    let result: Product | undefined;
+    service.getProductById('trj-crd').subscribe(product => {
+      result = product;
     });
+    
+    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    req.flush({ data: mockProducts });
+    tick();
+    
+    expect(result).toBeTruthy();
+    expect(result?.name).toBe('Tarjetas de Crédito');
+    flush();
+  }));
 
-    it('debería encontrar producto por ID', (done) => {
-      service.getProductById('trj-crd').subscribe(product => {
-        expect(product).toBeTruthy();
-        expect(product?.name).toBe('Tarjetas de Crédito');
-        done();
-      });
+  it('debería retornar undefined si no existe', fakeAsync(() => {
+    let result: Product | undefined = undefined;
+    service.getProductById('no-existe').subscribe(product => {
+      result = product;
     });
-
-    it('debería retornar undefined si no existe', (done) => {
-      service.getProductById('no-existe').subscribe(product => {
-        expect(product).toBeUndefined();
-        done();
-      });
-    });
-  });
+    
+    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    req.flush({ data: mockProducts });
+    tick();
+    
+    expect(result).toBeUndefined();
+    flush();
+  }));
+});
 });

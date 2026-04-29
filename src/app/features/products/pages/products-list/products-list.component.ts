@@ -1,7 +1,7 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { Product, ProductSortField, ProductSortOrder } from '../../models/product.model';
 import { ProductSkeletonComponent } from '../../components/product-skeleton/product-skeleton.component';
@@ -11,10 +11,16 @@ import { NotificationService } from '../../../../core/services/notification.serv
  * Componente principal de listado de productos
  * Historia SS-001: Listado de Productos con búsqueda, filtrado y paginación
  * Diseño D1: Tabla de productos según especificación
+ *
+ * Estrategia: ChangeDetectionStrategy.OnPush
+ * Los componentes solo se actualizan cuando una señal cambia o un input se modifica.
+ * Al usar Signals para TODO el estado interno, el renderizado es quirúrgico:
+ * solo el componente cuya señal cambió se actualiza, no todo el árbol.
  */
 @Component({
   selector: 'app-products-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,
@@ -28,6 +34,7 @@ export class ProductsListComponent implements OnInit {
   // Inyección de servicios
   private readonly productService = inject(ProductService);
   private readonly notificationService = inject(NotificationService);
+  private readonly router = inject(Router);
 
   // Signals para estado reactivo
   private readonly _products = signal<Product[]>([]);
@@ -39,6 +46,12 @@ export class ProductsListComponent implements OnInit {
   private readonly _sortField = signal<ProductSortField>('name');
   private readonly _sortOrder = signal<ProductSortOrder>('asc');
 
+  // Signals para dropdown y modal
+  readonly openMenuId = signal<string | null>(null);
+  readonly deleteTargetId = signal<string | null>(null);
+  readonly deleteTargetName = signal<string>('');
+  readonly isDeleting = signal<boolean>(false);
+
   // Computed signals (públicos para el template)
   readonly products = computed(() => this._products());
   readonly isLoading = computed(() => this._isLoading());
@@ -46,6 +59,8 @@ export class ProductsListComponent implements OnInit {
   readonly searchQuery = computed(() => this._searchQuery());
   readonly pageSize = computed(() => this._pageSize());
   readonly currentPage = computed(() => this._currentPage());
+  readonly sortField = computed(() => this._sortField());
+  readonly sortOrder = computed(() => this._sortOrder());
 
   // Productos filtrados
   readonly filteredProducts = computed(() => {
@@ -170,19 +185,91 @@ export class ProductsListComponent implements OnInit {
     return this._sortOrder() === 'asc' ? '▲' : '▼';
   }
 
+  /** Calcula el rango mostrado */
+  displayedRange(): { start: number; end: number } {
+    const start = (this._currentPage() - 1) * this._pageSize() + 1;
+    const end = Math.min(start + this._pageSize() - 1, this.totalResults());
+    return { start, end };
+  }
+
+  /** Genera array de números de página */
+  getPageNumbers(): number[] {
+    const total = this.totalPages();
+    return Array.from({ length: total }, (_, i) => i + 1);
+  }
+
   /** Formatea fecha para mostrar */
   formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    // Parsear fecha como UTC para evitar problemas de zona horaria
+    const date = new Date(dateString + 'T00:00:00Z');
+    const day = date.getUTCDate().toString().padStart(2, '0');
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+    const year = date.getUTCFullYear();
+    return `${day}/${month}/${year}`;
   }
 
   /** Maneja error de imagen */
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.src = 'assets/images/placeholder.png';
+  }
+
+  // ----------------------------------------------------------------
+  // Dropdown menú contextual
+  // ----------------------------------------------------------------
+
+  /** Abre/cierra el menú de una fila específica */
+  toggleMenu(event: Event, productId: string): void {
+    event.stopPropagation();
+    this.openMenuId.set(this.openMenuId() === productId ? null : productId);
+  }
+
+  /** Cierra todos los menús */
+  closeAllMenus(): void {
+    this.openMenuId.set(null);
+  }
+
+  /** Navega al formulario de edición (F5) */
+  onEditProduct(product: Product): void {
+    this.openMenuId.set(null);
+    this.router.navigate(['/products', product.id]);
+  }
+
+  // ----------------------------------------------------------------
+  // Eliminación con modal de confirmación (F6)
+  // ----------------------------------------------------------------
+
+  /** Abre el modal de confirmación de eliminación */
+  onDeleteProduct(product: Product): void {
+    this.openMenuId.set(null);
+    this.deleteTargetId.set(product.id);
+    this.deleteTargetName.set(product.name);
+  }
+
+  /** Cancela la eliminación y cierra el modal */
+  cancelDelete(): void {
+    this.deleteTargetId.set(null);
+    this.deleteTargetName.set('');
+  }
+
+  /** Confirma y ejecuta la eliminación */
+  confirmDelete(): void {
+    const id = this.deleteTargetId();
+    if (!id) return;
+
+    this.isDeleting.set(true);
+
+    this.productService.deleteProduct(id).subscribe({
+      next: () => {
+        this._products.update(products => products.filter(p => p.id !== id));
+        this.notificationService.showSuccess('Producto eliminado exitosamente');
+        this.cancelDelete();
+        this.isDeleting.set(false);
+      },
+      error: () => {
+        this.notificationService.showError('Error al eliminar el producto');
+        this.isDeleting.set(false);
+      }
+    });
   }
 }

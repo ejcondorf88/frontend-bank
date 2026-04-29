@@ -1,10 +1,10 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideRouter, ActivatedRoute } from '@angular/router';
 import { ProductsListComponent } from './products-list.component';
 import { ProductService } from '../../services/product.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Product } from '../../models/product.model';
-import { signal } from '@angular/core';
 import { of, throwError } from 'rxjs';
 
 /**
@@ -14,8 +14,8 @@ import { of, throwError } from 'rxjs';
 describe('ProductsListComponent', () => {
   let component: ProductsListComponent;
   let fixture: ComponentFixture<ProductsListComponent>;
-  let productService: jasmine.SpyObj<ProductService>;
-  let notificationService: jasmine.SpyObj<NotificationService>;
+  let productService: jest.Mocked<ProductService>;
+  let notificationService: jest.Mocked<NotificationService>;
 
   const mockProducts: Product[] = [
     {
@@ -69,16 +69,20 @@ describe('ProductsListComponent', () => {
   ];
 
   beforeEach(async () => {
-    const productServiceSpy = jasmine.createSpyObj('ProductService', [
-      'getProducts',
-      'getProductsWithFilters',
-      'deleteProduct'
-    ]);
-    
-    const notificationServiceSpy = jasmine.createSpyObj('NotificationService', [
-      'showError',
-      'showSuccess'
-    ]);
+    const productServiceSpy = {
+      getProducts: jest.fn(),
+      getProductsWithFilters: jest.fn(),
+      deleteProduct: jest.fn()
+    } as unknown as jest.Mocked<ProductService>;
+
+    const notificationServiceSpy = {
+      showError: jest.fn(),
+      showSuccess: jest.fn()
+    } as unknown as jest.Mocked<NotificationService>;
+
+    const routerSpy = {
+      navigate: jest.fn()
+    } as unknown as jest.Mocked<Router>;
 
     await TestBed.configureTestingModule({
       imports: [
@@ -87,18 +91,22 @@ describe('ProductsListComponent', () => {
       ],
       providers: [
         { provide: ProductService, useValue: productServiceSpy },
-        { provide: NotificationService, useValue: notificationServiceSpy }
+        { provide: NotificationService, useValue: notificationServiceSpy },
+        provideRouter([]),
+        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: jest.fn() } } } }
       ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProductsListComponent);
     component = fixture.componentInstance;
-    productService = TestBed.inject(ProductService) as jasmine.SpyObj<ProductService>;
-    notificationService = TestBed.inject(NotificationService) as jasmine.SpyObj<NotificationService>;
+    productService = TestBed.inject(ProductService) as jest.Mocked<ProductService>;
+    notificationService = TestBed.inject(NotificationService) as jest.Mocked<NotificationService>;
   });
 
   afterEach(() => {
-    fixture.destroy();
+    if (fixture) {
+      fixture.destroy();
+    }
   });
 
   // ============================================
@@ -110,35 +118,35 @@ describe('ProductsListComponent', () => {
     });
 
     it('debería inicializar con estado de carga activo', () => {
-      expect(component.isLoading()).toBeTrue();
+      expect(component.isLoading()).toBe(true);
       expect(component.products()).toEqual([]);
     });
 
     it('debería cargar productos al inicializar', fakeAsync(() => {
-      productService.getProducts.and.returnValue(of(mockProducts));
+      productService.getProducts.mockReturnValue(of(mockProducts));
       
       fixture.detectChanges(); // ngOnInit se ejecuta
       tick();
       
       expect(productService.getProducts).toHaveBeenCalled();
       expect(component.products()).toEqual(mockProducts);
-      expect(component.isLoading()).toBeFalse();
+      expect(component.isLoading()).toBe(false);
       expect(component.error()).toBeNull();
     }));
 
     it('debería mostrar error si falla la carga', fakeAsync(() => {
-      productService.getProducts.and.returnValue(throwError(() => new Error('Error')));
+      productService.getProducts.mockReturnValue(throwError(() => new Error('Error')));
       
       fixture.detectChanges();
       tick();
       
-      expect(component.isLoading()).toBeFalse();
+      expect(component.isLoading()).toBe(false);
       expect(component.error()).toBeTruthy();
       expect(notificationService.showError).toHaveBeenCalled();
     }));
 
     it('debería calcular total de resultados correctamente', fakeAsync(() => {
-      productService.getProducts.and.returnValue(of(mockProducts));
+      productService.getProducts.mockReturnValue(of(mockProducts));
       
       fixture.detectChanges();
       tick();
@@ -152,7 +160,7 @@ describe('ProductsListComponent', () => {
   // ============================================
   describe('F2 - Búsqueda', () => {
     beforeEach(fakeAsync(() => {
-      productService.getProducts.and.returnValue(of(mockProducts));
+      productService.getProducts.mockReturnValue(of(mockProducts));
       fixture.detectChanges();
       tick();
     }));
@@ -220,7 +228,7 @@ describe('ProductsListComponent', () => {
   // ============================================
   describe('F3 - Paginación', () => {
     beforeEach(fakeAsync(() => {
-      productService.getProducts.and.returnValue(of(mockProducts));
+      productService.getProducts.mockReturnValue(of(mockProducts));
       fixture.detectChanges();
       tick();
     }));
@@ -310,28 +318,30 @@ describe('ProductsListComponent', () => {
   // ============================================
   describe('Ordenamiento', () => {
     beforeEach(fakeAsync(() => {
-      productService.getProducts.and.returnValue(of(mockProducts));
+      productService.getProducts.mockReturnValue(of(mockProducts));
       fixture.detectChanges();
       tick();
     }));
 
-    it('debería ordenar por nombre ascendente', () => {
-      component.onSort('name');
-      fixture.detectChanges();
-      
-      expect(component.sortField()).toBe('name');
-      expect(component.sortOrder()).toBe('asc');
-      expect(component.filteredProducts()[0].name).toBe('Cuenta Corriente');
-    });
+  it('debería ordenar por nombre ascendente', () => {
+    // Inicialmente ordena por 'name' ascendente, así que cambiamos a otro campo primero
+    component.onSort('date_release');
+    component.onSort('name');
+    fixture.detectChanges();
 
-    it('debería cambiar a descendente si ya ordenaba por ese campo', () => {
-      component.onSort('name');
-      component.onSort('name');
-      fixture.detectChanges();
-      
-      expect(component.sortOrder()).toBe('desc');
-      expect(component.filteredProducts()[0].name).toBe('Tarjetas de Crédito');
-    });
+    expect(component.sortField()).toBe('name');
+    expect(component.sortOrder()).toBe('asc');
+    expect(component.filteredProducts()[0].name).toBe('Cuenta Corriente');
+  });
+
+  it('debería cambiar a descendente si ya ordenaba por ese campo', () => {
+    // El componente inicia ordenando por 'name', así que al hacer onSort cambia a desc
+    component.onSort('name');
+    fixture.detectChanges();
+
+    expect(component.sortOrder()).toBe('desc');
+    expect(component.filteredProducts()[0].name).toBe('Tarjetas de Crédito');
+  });
 
     it('debería ordenar por fecha de liberación', () => {
       component.onSort('date_release');
@@ -344,19 +354,19 @@ describe('ProductsListComponent', () => {
 
     it('debería identificar campo ordenado correctamente', () => {
       component.onSort('name');
-      expect(component.isSortedBy('name')).toBeTrue();
-      expect(component.isSortedBy('date_release')).toBeFalse();
+      expect(component.isSortedBy('name')).toBe(true);
+      expect(component.isSortedBy('date_release')).toBe(false);
     });
 
-    it('debería retornar icono de ordenamiento correcto', () => {
-      component.onSort('name');
-      expect(component.getSortIcon('name')).toBe('↑');
-      
-      component.onSort('name');
-      expect(component.getSortIcon('name')).toBe('↓');
-      
-      expect(component.getSortIcon('date_release')).toBe('');
-    });
+  it('debería retornar icono de ordenamiento correcto', () => {
+    // El componente inicia con sortField='name' y sortOrder='asc'
+    expect(component.getSortIcon('name')).toBe('▲');
+
+    component.onSort('name');
+    expect(component.getSortIcon('name')).toBe('▼');
+
+    expect(component.getSortIcon('date_release')).toBe('');
+  });
   });
 
   // ============================================
@@ -382,17 +392,16 @@ describe('ProductsListComponent', () => {
   // TESTS: Skeleton Array
   // ============================================
   describe('Skeleton Loading', () => {
-    beforeEach(fakeAsync(() => {
-      productService.getProducts.and.returnValue(of(mockProducts));
+    it('debería generar array de skeletons basado en pageSize', fakeAsync(() => {
+      productService.getProducts.mockReturnValue(of(mockProducts));
       fixture.detectChanges();
       tick();
-    }));
-
-    it('debería generar array de skeletons basado en pageSize', () => {
-      expect(component.skeletonArray().length).toBe(5);
       
+      expect(component.skeletonArray().length).toBe(5);
+
       component.onPageSizeChange(10);
       expect(component.skeletonArray().length).toBe(10);
-    });
+      flush();
+    }));
   });
 });

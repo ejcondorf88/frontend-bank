@@ -1,14 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 /**
  * Componente Skeleton para productos
  * Muestra una animación de carga mientras se obtienen los datos reales
  * Mejora la experiencia de usuario evitando pantallas en blanco
+ *
+ * Estrategia: ChangeDetectionStrategy.OnPush
+ * Componente puramente presentacional sin estado mutable.
+ * Una vez renderizado, no necesita actualizarse nunca.
  */
 @Component({
   selector: 'app-product-skeleton',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   template: `
     <div class="skeleton-card" role="status" aria-label="Cargando producto...">

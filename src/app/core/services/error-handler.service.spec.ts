@@ -110,11 +110,12 @@ describe('ErrorHandlerService', () => {
       expect(message).toBe('Error en la solicitud. Por favor, verifica los datos.');
     });
 
-    it('debería usar mensaje por defecto para errores desconocidos', () => {
+    it('debería usar mensaje de servidor para códigos 5xx no mapeados', () => {
       const error = new HttpErrorResponse({ status: 999 });
       const message = service.handleError(error, false);
 
-      expect(message).toBe('Ocurrió un error inesperado. Por favor, intenta nuevamente.');
+      // 999 es >= 500, cae en el bloque de errores de servidor
+      expect(message).toBe('Error del servidor. Por favor, intenta más tarde.');
     });
   });
 

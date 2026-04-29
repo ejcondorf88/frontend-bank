@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Product } from '../../models/product.model';
@@ -6,41 +6,46 @@ import { Product } from '../../models/product.model';
 /**
  * Componente Card para mostrar un producto financiero
  * Diseño limpio con información del producto y acciones disponibles
+ *
+ * Estrategia: ChangeDetectionStrategy.OnPush
+ * Los inputs son signals (input()), por lo que Angular solo actualiza
+ * este componente cuando la referencia del producto cambia.
  */
 @Component({
   selector: 'app-product-card',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterLink],
   template: `
-    <article class="product-card" [attr.aria-label]="'Producto: ' + product.name">
+    <article class="product-card" [attr.aria-label]="'Producto: ' + product().name">
       <header class="product-header">
         <div class="product-logo">
           <img 
-            [src]="product.logo" 
-            [alt]="'Logo de ' + product.name"
+            [src]="product().logo" 
+            [alt]="'Logo de ' + product().name"
             loading="lazy"
             (error)="onImageError($event)"
           />
         </div>
         <div class="product-info">
-          <h3 class="product-name">{{ product.name }}</h3>
-          <span class="product-id">ID: {{ product.id }}</span>
+          <h3 class="product-name">{{ product().name }}</h3>
+          <span class="product-id">ID: {{ product().id }}</span>
         </div>
       </header>
       
       <div class="product-body">
-        <p class="product-description">{{ product.description }}</p>
+        <p class="product-description">{{ product().description }}</p>
       </div>
       
       <footer class="product-footer">
         <div class="product-dates">
           <div class="date-item">
             <span class="date-label">Liberación:</span>
-            <span class="date-value">{{ formatDate(product.date_release) }}</span>
+            <span class="date-value">{{ formatDate(product().date_release) }}</span>
           </div>
           <div class="date-item">
             <span class="date-label">Revisión:</span>
-            <span class="date-value">{{ formatDate(product.date_revision) }}</span>
+            <span class="date-value">{{ formatDate(product().date_revision) }}</span>
           </div>
         </div>
         
@@ -279,10 +284,13 @@ import { Product } from '../../models/product.model';
   `]
 })
 export class ProductCardComponent {
-  @Input({ required: true }) product!: Product;
+  /** Producto a mostrar — input signal para reactividad con OnPush */
+  readonly product = input.required<Product>();
   
-  @Output() edit = new EventEmitter<string>();
-  @Output() delete = new EventEmitter<string>();
+  /** Evento al editar */
+  readonly edit = output<string>();
+  /** Evento al eliminar */
+  readonly delete = output<string>();
 
   menuOpen = false;
 
@@ -297,12 +305,12 @@ export class ProductCardComponent {
 
   onEdit(): void {
     this.menuOpen = false;
-    this.edit.emit(this.product.id);
+    this.edit.emit(this.product().id);
   }
 
   onDelete(): void {
     this.menuOpen = false;
-    this.delete.emit(this.product.id);
+    this.delete.emit(this.product().id);
   }
 
   onImageError(event: Event): void {
