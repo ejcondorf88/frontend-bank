@@ -1,9 +1,18 @@
 # Frontend Bank — Sistema de Gestión de Productos Financieros
 
-**Nivel:** Semi-Senior  
+**Nivel:** Semi-Senior / Senior  
 **Tecnología:** Angular 17+ con Signals  
 **Evaluación:** Prueba Técnica Frontend  
-**Estado:** ✅ F1-F4 completos | 🟡 F5 ~90% | 🟠 F6 ~70%
+**Estado:** ✅ F1-F6 Completos | 🚀 Desplegado en Vercel | 🧪 Coverage > 83%
+
+---
+
+## 🚀 Demo en Vivo
+
+Puedes probar la aplicación en tiempo real aquí:  
+👉 **[Frontend Bank - Vercel Demo](https://frontend-bank-git-feature-initial-67e184-ejcondorf88s-projects.vercel.app/products)**
+
+> **Nota:** El backend está desplegado en Railway y configurado con CORS dinámicos para permitir peticiones desde esta URL de Vercel y Localhost.
 
 ---
 
