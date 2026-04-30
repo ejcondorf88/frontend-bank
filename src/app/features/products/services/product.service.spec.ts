@@ -2,11 +2,14 @@ import { TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ProductService } from './product.service';
 import { Product } from '../models/product.model';
+import { environment } from '../../../../environments/environment';
 
 describe('ProductService', () => {
   let service: ProductService;
   let httpMock: HttpTestingController;
-  const apiUrl = 'http://localhost:3002';
+  const apiUrl = environment.apiUrl;
+  const apiPrefix = environment.apiPrefix;
+  const endpoint = `${apiUrl}${apiPrefix}/products`;
 
   const mockProducts: Product[] = [
     {
@@ -55,7 +58,7 @@ describe('ProductService', () => {
         expect(products).toEqual(mockProducts);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+      const req = httpMock.expectOne(endpoint);
       expect(req.request.method).toBe('GET');
       req.flush({ data: mockProducts });
     });
@@ -68,7 +71,7 @@ describe('ProductService', () => {
         }
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+      const req = httpMock.expectOne(endpoint);
       req.flush({ message: 'Server error' }, { status: 500, statusText: 'Internal Server Error' });
     });
 
@@ -80,7 +83,7 @@ describe('ProductService', () => {
         }
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+      const req = httpMock.expectOne(endpoint);
       req.error(new ErrorEvent('Network error'));
     });
   });
@@ -92,7 +95,7 @@ describe('F2 - searchProducts', () => {
       result = products;
     });
     
-    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    const req = httpMock.expectOne(endpoint);
     req.flush({ data: mockProducts });
     tick();
     
@@ -107,7 +110,7 @@ describe('F2 - searchProducts', () => {
       result = products;
     });
     
-    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    const req = httpMock.expectOne(endpoint);
     req.flush({ data: mockProducts });
     tick();
     
@@ -122,7 +125,7 @@ describe('F2 - searchProducts', () => {
       result = products;
     });
     
-    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    const req = httpMock.expectOne(endpoint);
     req.flush({ data: mockProducts });
     tick();
     
@@ -136,7 +139,7 @@ describe('F2 - searchProducts', () => {
       result = products;
     });
     
-    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    const req = httpMock.expectOne(endpoint);
     req.flush({ data: mockProducts });
     tick();
     
@@ -150,7 +153,7 @@ describe('F2 - searchProducts', () => {
       result = products;
     });
     
-    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    const req = httpMock.expectOne(endpoint);
     req.flush({ data: mockProducts });
     tick();
     
@@ -164,7 +167,7 @@ describe('F2 - searchProducts', () => {
       result = products;
     });
     
-    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    const req = httpMock.expectOne(endpoint);
     req.flush({ data: mockProducts });
     tick();
     
@@ -181,7 +184,7 @@ describe('F3 - getProductsWithFilters', () => {
       result = products;
     });
     
-    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    const req = httpMock.expectOne(endpoint);
     req.flush({ data: mockProducts });
     tick();
     
@@ -198,7 +201,7 @@ describe('F3 - getProductsWithFilters', () => {
       result = products;
     });
     
-    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    const req = httpMock.expectOne(endpoint);
     req.flush({ data: mockProducts });
     tick();
     
@@ -217,7 +220,7 @@ describe('F3 - getProductsWithFilters', () => {
       result = products;
     });
     
-    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    const req = httpMock.expectOne(endpoint);
     req.flush({ data: mockProducts });
     tick();
     
@@ -235,7 +238,7 @@ describe('F3 - getProductsWithFilters', () => {
       result = products;
     });
     
-    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    const req = httpMock.expectOne(endpoint);
     req.flush({ data: mockProducts });
     tick();
     
@@ -255,7 +258,7 @@ describe('F3 - getProductsWithFilters', () => {
       result = products;
     });
     
-    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    const req = httpMock.expectOne(endpoint);
     req.flush({ data: mockProducts });
     tick();
     
@@ -323,7 +326,7 @@ describe('F3 - getProductsWithFilters', () => {
         expect(product).toEqual(newProduct);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+      const req = httpMock.expectOne(endpoint);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(newProduct);
       req.flush({ message: 'Product added successfully', data: newProduct });
@@ -336,7 +339,7 @@ describe('F3 - getProductsWithFilters', () => {
         expect(product.name).toBe('Nombre Actualizado');
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/bp/products/trj-crd`);
+      const req = httpMock.expectOne(`${endpoint}/trj-crd`);
       expect(req.request.method).toBe('PUT');
       req.flush({ message: 'Product updated successfully', data: { ...mockProducts[0], ...updateData } });
     });
@@ -346,7 +349,7 @@ describe('F3 - getProductsWithFilters', () => {
         expect(true).toBe(true);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/bp/products/trj-crd`);
+      const req = httpMock.expectOne(`${endpoint}/trj-crd`);
       expect(req.request.method).toBe('DELETE');
       req.flush({ message: 'Product removed successfully' });
     });
@@ -356,7 +359,7 @@ describe('F3 - getProductsWithFilters', () => {
         expect(exists).toBe(true);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/bp/products/verification/existing-id`);
+      const req = httpMock.expectOne(`${endpoint}/verification/existing-id`);
       expect(req.request.method).toBe('GET');
       req.flush(true);
     });
@@ -366,7 +369,7 @@ describe('F3 - getProductsWithFilters', () => {
         expect(exists).toBe(false);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/bp/products/verification/new-id`);
+      const req = httpMock.expectOne(`${endpoint}/verification/new-id`);
       req.flush(false);
     });
   });
@@ -378,7 +381,7 @@ describe('getProductById', () => {
       result = product;
     });
     
-    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    const req = httpMock.expectOne(endpoint);
     req.flush({ data: mockProducts });
     tick();
     
@@ -393,7 +396,7 @@ describe('getProductById', () => {
       result = product;
     });
     
-    const req = httpMock.expectOne(`${apiUrl}/bp/products`);
+    const req = httpMock.expectOne(endpoint);
     req.flush({ data: mockProducts });
     tick();
     

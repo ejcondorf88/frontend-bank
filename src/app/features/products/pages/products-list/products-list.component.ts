@@ -211,6 +211,7 @@ export class ProductsListComponent implements OnInit {
   /** Maneja error de imagen */
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
+    img.onerror = null; 
     img.src = 'assets/images/placeholder.png';
   }
 
