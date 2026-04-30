@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';
 import { Product, ProductResponse, ProductRequest, IdVerificationResponse, ProductFilters, ApiResponse } from '../models/product.model';
+import { environment } from '../../../../environments/environment';
 
 /**
  * Servicio para gestionar productos financieros
@@ -19,14 +20,15 @@ import { Product, ProductResponse, ProductRequest, IdVerificationResponse, Produ
 })
 export class ProductService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:3002';
+  /** URL base de la API. Los endpoints específicos se concatenan aquí. */
+  private readonly apiBaseUrl = environment.apiUrl;
 
   /**
    * Obtiene todos los productos financieros
    * @returns Observable con array de productos
    */
   getProducts(): Observable<Product[]> {
-    return this.http.get<ProductResponse>(`${this.apiUrl}/bp/products`).pipe(
+    return this.http.get<ProductResponse>(`${this.apiBaseUrl}/bp/products`).pipe(
       map(response => response.data),
       catchError(this.handleError)
     );
@@ -51,7 +53,7 @@ export class ProductService {
    * @returns Observable con el producto creado
    */
   createProduct(product: ProductRequest): Observable<Product> {
-    return this.http.post<ApiResponse<Product>>(`${this.apiUrl}/bp/products`, product).pipe(
+    return this.http.post<ApiResponse<Product>>(`${this.apiBaseUrl}/bp/products`, product).pipe(
       map(response => response.data),
       catchError(this.handleError)
     );
@@ -65,7 +67,7 @@ export class ProductService {
    * @returns Observable con el producto actualizado
    */
   updateProduct(id: string, product: Partial<ProductRequest>): Observable<Product> {
-    return this.http.put<ApiResponse<Product>>(`${this.apiUrl}/bp/products/${id}`, product).pipe(
+    return this.http.put<ApiResponse<Product>>(`${this.apiBaseUrl}/bp/products/${id}`, product).pipe(
       map(response => response.data),
       catchError(this.handleError)
     );
@@ -77,7 +79,7 @@ export class ProductService {
    * @returns Observable vacío
    */
   deleteProduct(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/bp/products/${id}`).pipe(
+    return this.http.delete<void>(`${this.apiBaseUrl}/bp/products/${id}`).pipe(
       catchError(this.handleError)
     );
   }
@@ -88,7 +90,7 @@ export class ProductService {
    * @returns Observable con booleano (true = existe)
    */
   checkIdExists(id: string): Observable<boolean> {
-    return this.http.get<boolean>(`${this.apiUrl}/bp/products/verification/${id}`).pipe(
+    return this.http.get<boolean>(`${this.apiBaseUrl}/bp/products/verification/${id}`).pipe(
       catchError(this.handleError)
     );
   }
