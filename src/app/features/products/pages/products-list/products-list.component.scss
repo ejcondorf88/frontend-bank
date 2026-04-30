@@ -567,7 +567,7 @@
   to   { opacity: 1; transform: scale(1); }
 }
 
-// Responsive
+// Responsive — Tableta y mobile
 @media (max-width: 768px) {
   .products-page {
     padding: 16px;
@@ -585,7 +585,12 @@
     }
   }
 
+  // Ocultar columnas menos importantes
   .col-description {
+    display: none;
+  }
+
+  .col-date {
     display: none;
   }
 
@@ -600,5 +605,59 @@
 
   .pagination {
     justify-content: center;
+  }
+}
+
+// Responsive — Móvil pequeño (<480px)
+@media (max-width: 480px) {
+  .products-page {
+    padding: 8px;
+  }
+
+  .main-content {
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  .products-table {
+    font-size: 0.6875rem;
+
+    th, td {
+      padding: 10px 6px;
+    }
+  }
+
+  .col-logo {
+    display: none;
+  }
+
+  // Solo queda: nombre + acciones
+  .col-name {
+    min-width: auto;
+  }
+
+  .search-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+
+    .search-box {
+      max-width: none;
+    }
+
+    .btn-add {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .results-info {
+    font-size: 0.75rem;
+    text-align: center;
+  }
+
+  .page-size-selector select {
+    width: 100%;
+    padding: 10px 32px 10px 12px;
   }
 }

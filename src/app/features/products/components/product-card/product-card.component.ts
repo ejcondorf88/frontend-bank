@@ -1,4 +1,4 @@
-import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy, HostListener, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Product } from '../../models/product.model';
@@ -64,7 +64,7 @@ import { Product } from '../../models/product.model';
           </button>
           
           @if (menuOpen) {
-            <div class="dropdown-menu" (clickOutside)="closeMenu()">
+            <div class="dropdown-menu">
               <button class="dropdown-item" (click)="onEdit()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -292,7 +292,17 @@ export class ProductCardComponent {
   /** Evento al eliminar */
   readonly delete = output<string>();
 
+  private readonly elementRef = inject(ElementRef);
+
   menuOpen = false;
+
+  /** Cierra el menú si se hace click fuera del componente */
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.menuOpen && !this.elementRef.nativeElement.contains(event.target)) {
+      this.menuOpen = false;
+    }
+  }
 
   toggleMenu(event: Event): void {
     event.stopPropagation();

@@ -274,12 +274,11 @@ describe('F3 - getProductsWithFilters', () => {
     });
 
   it('debería validar fechas correctas', () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayStr = today.toISOString().split('T')[0];
-    const revision = service.calculateRevisionDate(todayStr);
+    // Usar fechas futuras para evitar problemas de zona horaria
+    const releaseDate = '2099-06-15';
+    const revision = service.calculateRevisionDate(releaseDate);
 
-    const result = service.validateDates(todayStr, revision);
+    const result = service.validateDates(releaseDate, revision);
     expect(result.valid).toBe(true);
   });
 
