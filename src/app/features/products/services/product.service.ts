@@ -20,15 +20,24 @@ import { environment } from '../../../../environments/environment';
 })
 export class ProductService {
   private readonly http = inject(HttpClient);
-  /** URL base de la API. Los endpoints específicos se concatenan aquí. */
-  private readonly apiBaseUrl = environment.apiUrl;
+  
+  /** URL base y prefijo desde el environment */
+  private readonly baseUrl = environment.apiUrl;
+  private readonly prefix = environment.apiPrefix;
+  
+  /** Endpoint principal de productos */
+  private readonly endpoint = `${this.baseUrl}${this.prefix}/products`;
+
+  constructor() {
+    console.log('DEBUG: ProductService endpoint =', this.endpoint);
+  }
 
   /**
    * Obtiene todos los productos financieros
    * @returns Observable con array de productos
    */
   getProducts(): Observable<Product[]> {
-    return this.http.get<ProductResponse>(`${this.apiBaseUrl}/bp/products`).pipe(
+    return this.http.get<ProductResponse>(this.endpoint).pipe(
       map(response => response.data),
       catchError(this.handleError)
     );
@@ -48,12 +57,11 @@ export class ProductService {
 
   /**
    * Crea un nuevo producto
-   * El backend retorna { message: string, data: Product }
    * @param product Datos del producto a crear
    * @returns Observable con el producto creado
    */
   createProduct(product: ProductRequest): Observable<Product> {
-    return this.http.post<ApiResponse<Product>>(`${this.apiBaseUrl}/bp/products`, product).pipe(
+    return this.http.post<ApiResponse<Product>>(this.endpoint, product).pipe(
       map(response => response.data),
       catchError(this.handleError)
     );
@@ -61,13 +69,12 @@ export class ProductService {
 
   /**
    * Actualiza un producto existente
-   * El backend retorna { message: string, data: Product }
    * @param id ID del producto
    * @param product Datos actualizados
    * @returns Observable con el producto actualizado
    */
   updateProduct(id: string, product: Partial<ProductRequest>): Observable<Product> {
-    return this.http.put<ApiResponse<Product>>(`${this.apiBaseUrl}/bp/products/${id}`, product).pipe(
+    return this.http.put<ApiResponse<Product>>(`${this.endpoint}/${id}`, product).pipe(
       map(response => response.data),
       catchError(this.handleError)
     );
@@ -79,7 +86,7 @@ export class ProductService {
    * @returns Observable vacío
    */
   deleteProduct(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiBaseUrl}/bp/products/${id}`).pipe(
+    return this.http.delete<void>(`${this.endpoint}/${id}`).pipe(
       catchError(this.handleError)
     );
   }
@@ -90,7 +97,7 @@ export class ProductService {
    * @returns Observable con booleano (true = existe)
    */
   checkIdExists(id: string): Observable<boolean> {
-    return this.http.get<boolean>(`${this.apiBaseUrl}/bp/products/verification/${id}`).pipe(
+    return this.http.get<boolean>(`${this.endpoint}/verification/${id}`).pipe(
       catchError(this.handleError)
     );
   }
@@ -145,18 +152,15 @@ export class ProductService {
    * @returns Objeto con validación y mensaje de error si aplica
    */
   validateDates(releaseDate: string, revisionDate: string): { valid: boolean; error?: string } {
-    // Normalizar fechas a medianoche UTC para comparaciones consistentes
     const release = new Date(releaseDate + 'T00:00:00Z');
     const revision = new Date(revisionDate + 'T00:00:00Z');
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
-    // Fecha de liberación debe ser >= hoy
     if (release.getTime() < today.getTime()) {
       return { valid: false, error: 'La fecha de liberación debe ser hoy o posterior' };
     }
 
-    // Fecha de revisión debe ser exactamente 1 año después
     const expectedRevision = new Date(release);
     expectedRevision.setUTCFullYear(expectedRevision.getUTCFullYear() + 1);
 
@@ -174,7 +178,6 @@ export class ProductService {
   private applyFilters(products: Product[], filters: ProductFilters): Product[] {
     let result = [...products];
 
-    // Filtro de búsqueda
     if (filters.search) {
       const lowerSearch = filters.search.toLowerCase();
       result = result.filter(p => 
@@ -183,7 +186,6 @@ export class ProductService {
       );
     }
 
-    // Filtro por estado
     if (filters.status && filters.status !== 'all') {
       const today = new Date();
       result = result.filter(p => {
@@ -199,7 +201,6 @@ export class ProductService {
       });
     }
 
-    // Ordenamiento
     if (filters.sortBy) {
       result.sort((a, b) => {
         const order = filters.sortOrder === 'desc' ? -1 : 1;
@@ -227,10 +228,8 @@ export class ProductService {
     let errorMessage = 'Ha ocurrido un error desconocido';
 
     if (error.error instanceof ErrorEvent) {
-      // Error del cliente
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Error del servidor
       switch (error.status) {
         case 400:
           errorMessage = error.error?.message || 'Solicitud inválida';
@@ -253,3 +252,4 @@ export class ProductService {
     return throwError(() => new Error(errorMessage));
   }
 }
+

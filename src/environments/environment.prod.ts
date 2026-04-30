@@ -10,7 +10,7 @@ export const environment = {
   production: true,
 
   /** URL base del backend API en producción */
-  apiUrl: 'https://api.bankapp.com',
+  apiUrl: 'https://api-pichincha-backend-production.up.railway.app',
 
   /** Nombre de la aplicación */
   appName: 'Frontend Bank',
