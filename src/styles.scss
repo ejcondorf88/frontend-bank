@@ -554,7 +554,7 @@ ul, ol {
 @for $i from 1 through 12 {
   .col-#{$i} {
     flex: 0 0 auto;
-    width: percentage($i / 12);
+    width: calc(#{$i} / 12 * 100%);
     padding-left: var(--space-4);
     padding-right: var(--space-4);
   }
@@ -574,7 +574,7 @@ $breakpoints: (
     @for $i from 1 through 12 {
       .col-#{$name}-#{$i} {
         flex: 0 0 auto;
-        width: percentage($i / 12);
+        width: calc(#{$i} / 12 * 100%);
       }
     }
   }

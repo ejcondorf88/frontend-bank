@@ -16,12 +16,12 @@
 **Para que** pueda conocer las opciones que ofrece el banco
 
 #### Criterios de Aceptación:
-- [ ] Consumir endpoint `GET /bp/products` al cargar la aplicación
-- [ ] Mostrar datos: id, nombre, descripción, logo, fecha de liberación, fecha de revisión
-- [ ] Implementar maquetación según diseño D1
-- [ ] Usar CSS manual (sin Bootstrap/Tailwind)
-- [ ] Mostrar skeletons/pantalla de carga mientras carga la API
-- [ ] Manejar errores visualmente si la API falla
+- [x] Consumir endpoint `GET /bp/products` al cargar la aplicación
+- [x] Mostrar datos: id, nombre, descripción, logo, fecha de liberación, fecha de revisión
+- [x] Implementar maquetación según diseño D1
+- [x] Usar CSS manual (sin Bootstrap/Tailwind)
+- [x] Mostrar skeletons/pantalla de carga mientras carga la API
+- [x] Manejar errores visualmente si la API falla
 
 #### Notas Técnicas:
 - Usar Angular Signals para el estado
@@ -38,12 +38,12 @@
 **Para que** pueda encontrar rápidamente el producto que necesito
 
 #### Criterios de Aceptación:
-- [ ] Implementar campo de búsqueda en la parte superior del listado
-- [ ] Filtrar productos en tiempo real por nombre o descripción
-- [ ] Mostrar resultados filtrados sin recargar la página
-- [ ] Permitir búsqueda case-insensitive
-- [ ] Mostrar mensaje "No se encontraron resultados" si no hay coincidencias
-- [ ] Implementar debounce (esperar 300ms después de escribir)
+- [x] Implementar campo de búsqueda en la parte superior del listado
+- [x] Filtrar productos en tiempo real por nombre o descripción
+- [x] Mostrar resultados filtrados sin recargar la página
+- [x] Permitir búsqueda case-insensitive
+- [x] Mostrar mensaje "No se encontraron resultados" si no hay coincidencias
+- [x] Implementar debounce (esperar 300ms después de escribir)
 
 #### Notas Técnicas:
 - Usar `computed()` para filtrar la lista
@@ -59,11 +59,11 @@
 **Para que** pueda controlar la cantidad de información visualizada
 
 #### Criterios de Aceptación:
-- [ ] Mostrar contador: "Mostrando X de Y productos"
-- [ ] Implementar select con opciones: 5, 10, 20 registros
-- [ ] Valor por defecto: 5 registros
-- [ ] Actualizar listado inmediatamente al cambiar el select
-- [ ] Mostrar paginación si hay más registros que el límite seleccionado
+- [x] Mostrar contador: "Mostrando X de Y productos"
+- [x] Implementar select con opciones: 5, 10, 20 registros
+- [x] Valor por defecto: 5 registros
+- [x] Actualizar listado inmediatamente al cambiar el select
+- [x] Mostrar paginación si hay más registros que el límite seleccionado
 
 #### Notas Técnicas:
 - Usar Signal para `pageSize` y `currentPage`
@@ -144,20 +144,20 @@
 **Para que** pueda expandir la oferta del banco
 
 #### Criterios de Aceptación:
-- [ ] Botón "Agregar" visible en listado (Diseño D3)
-- [ ] Navegar a formulario en ruta `/products/new`
-- [ ] Campos del formulario (Diseño D2):
+- [x] Botón "Agregar" visible en listado (Diseño D3)
+- [x] Navegar a formulario en ruta `/products/new`
+- [x] Campos del formulario (Diseño D2):
   - **ID**: Requerido, min 3, max 10 caracteres
   - **Nombre**: Requerido, min 5, max 100 caracteres
   - **Descripción**: Requerido, min 10, max 200 caracteres
   - **Logo**: Requerido, URL válida
   - **Fecha Liberación**: Requerido, >= fecha actual
   - **Fecha Revisión**: Requerido, exactamente 1 año después de liberación
-- [ ] Validar que ID no existe vía `GET /bp/products/verification/:id`
-- [ ] Botón "Agregar" para enviar formulario
-- [ ] Botón "Reiniciar" para limpiar formulario
-- [ ] Mostrar errores visuales por campo
-- [ ] Redirigir a listado tras éxito
+- [x] Validar que ID no existe vía `GET /bp/products/verification/:id`
+- [x] Botón "Agregar" para enviar formulario
+- [x] Botón "Reiniciar" para limpiar formulario
+- [x] Mostrar errores visuales por campo
+- [x] Redirigir a listado tras éxito
 
 #### Validaciones Técnicas:
 ```typescript
@@ -202,13 +202,13 @@ Validators.custom((fechaRevision) =>
 **Para que** pueda actualizar la información
 
 #### Criterios de Aceptación:
-- [ ] Menú dropdown en cada producto (Diseño D3)
-- [ ] Opción "Editar" en el menú
-- [ ] Navegar a `/products/:id/edit`
-- [ ] Cargar datos del producto seleccionado
-- [ ] Campo ID deshabilitado (no editable)
-- [ ] Mantener mismas validaciones que en creación
-- [ ] Prevenir navegación si hay cambios sin guardar
+- [x] Menú dropdown en cada producto (Diseño D3)
+- [x] Opción "Editar" en el menú
+- [x] Navegar a `/products/:id/edit`
+- [x] Cargar datos del producto seleccionado
+- [x] Campo ID deshabilitado (no editable)
+- [x] Mantener mismas validaciones que en creación
+- [x] Prevenir navegación si hay cambios sin guardar
 
 ---
 
@@ -309,18 +309,18 @@ Validators.custom((fechaRevision) =>
 **Quiero** eliminar productos de forma segura  **Para que** evite eliminaciones accidentales
 
 #### Criterios de Aceptación:
-- [ ] Opción "Eliminar" en menú dropdown (Diseño D3)
-- [ ] Modal de confirmación (Diseño D4) con:
+- [x] Opción "Eliminar" en menú dropdown (Diseño D3)
+- [x] Modal de confirmación (Diseño D4) con:
   - Nombre del producto destacado
   - Advertencia de irreversibilidad
   - Checkbox "Entiendo que esta acción no se puede deshacer"
   - Botón "Cancelar" (primario)
   - Botón "Eliminar" (destructivo, rojo)
-- [ ] Eliminar producto vía `DELETE /bp/products/:id`
-- [ ] Feedback visual de éxito (toast notification)
-- [ ] Actualización optimista del listado
-- [ ] Undo disponible por 5 segundos
-- [ ] Soft delete (ocultar pero no eliminar de estado local)
+- [x] Eliminar producto vía `DELETE /bp/products/:id`
+- [x] Feedback visual de éxito (toast notification)
+- [x] Actualización optimista del listado
+- [x] Undo disponible por 5 segundos
+- [x] Soft delete (ocultar pero no eliminar de estado local)
 
 ---
 
