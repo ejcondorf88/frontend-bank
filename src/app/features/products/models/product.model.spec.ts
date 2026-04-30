@@ -1,4 +1,4 @@
-import { Product, ProductRequest, ProductUI, CurrencyCode } from './product.model';
+import { Product, ProductRequest, ProductUI } from './product.model';
 
 describe('Product Model', () => {
   describe('Product Interface', () => {
@@ -127,16 +127,5 @@ describe('Product Model', () => {
     });
   });
 
-  describe('CurrencyCode Type', () => {
-    it('debería aceptar códigos de moneda válidos', () => {
-      const validCurrencies: CurrencyCode[] = [
-        'USD', 'EUR', 'GBP', 'JPY', 'MXN', 
-        'ARS', 'BRL', 'CLP', 'COP'
-      ];
-
-      validCurrencies.forEach(currency => {
-        expect(currency).toBeTruthy();
-      });
-    });
-  });
+  // CurrencyCode type removed — no longer exists in product.model.ts
 });

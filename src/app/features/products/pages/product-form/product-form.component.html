@@ -73,13 +73,13 @@
         <!-- Descripción -->
         <div class="form-field" [class.has-error]="isFieldInvalid('description')">
           <label for="description">Descripción</label>
-          <input
+          <textarea
             id="description"
-            type="text"
             formControlName="description"
             placeholder="Ej: Tarjeta de consumo bajo la modalidad de crédito"
             maxlength="200"
-          />
+            rows="3"
+          ></textarea>
           @if (hasError('description', 'required')) {
             <span class="error-message">Este campo es requerido</span>
           }

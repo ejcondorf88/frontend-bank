@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { provideRouter, ActivatedRoute } from '@angular/router';
+import { provideRouter, ActivatedRoute, Router } from '@angular/router';
 import { ProductsListComponent } from './products-list.component';
 import { ProductService } from '../../services/product.service';
 import { NotificationService } from '../../../../core/services/notification.service';
